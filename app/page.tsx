@@ -46,10 +46,10 @@ export default function Home() {
     } catch (err) {
       console.error("Error fetching companies:", err);
       // Fallback for demo
-      const mockData = [
-        { id: 1, name: "Apple", region: "North America", skus: 24300, status: "Synced" },
-        { id: 2, name: "Samsung", region: "Asia Pacific", skus: 41200, status: "Pending" },
-        { id: 3, name: "Gucci", region: "Europe", skus: 18700, status: "Synced" },
+      const mockData: Company[] = [
+        { id: 1, name: "Apple", region: "North America", skus: 24300, status: "Synced" as const },
+        { id: 2, name: "Samsung", region: "Asia Pacific", skus: 41200, status: "Pending" as const },
+        { id: 3, name: "Gucci", region: "Europe", skus: 18700, status: "Synced" as const },
       ];
       setCompanyData({ data: mockData, total: 3, page: 1, limit: 20, totalPages: 1 });
     } finally {
