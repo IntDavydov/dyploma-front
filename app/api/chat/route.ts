@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         "X-Title": "Shop-Sync Gateway",           // Optional: Your app name
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct:free", // Mistral free model on OpenRouter
+        model: "deepseek/deepseek-chat", // DeepSeek-V3 on OpenRouter
         messages: [
           {
             role: "system",
