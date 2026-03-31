@@ -92,9 +92,11 @@ export default function Home() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-           <FilterButton label="All" active />
-           <FilterButton label="North America" />
-           <FilterButton label="Europe" />
+           <FilterButton label="All" active={regionFilter === "All"} onClick={() => setRegionFilter("All")} />
+           <FilterButton label="North America" active={regionFilter === "North America"} onClick={() => setRegionFilter("North America")} />
+           <FilterButton label="Europe" active={regionFilter === "Europe"} onClick={() => setRegionFilter("Europe")} />
+           <FilterButton label="Asia Pacific" active={regionFilter === "Asia Pacific"} onClick={() => setRegionFilter("Asia Pacific")} />
+           <FilterButton label="Latin America" active={regionFilter === "Latin America"} onClick={() => setRegionFilter("Latin America")} />
         </div>
       </div>
 
@@ -161,7 +163,7 @@ export default function Home() {
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1 || loading}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              className="cursor-pointer disabled:cursor-not-allowed flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
             >
                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -173,7 +175,7 @@ export default function Home() {
                   <button
                     key={i + 1}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`h-10 w-10 rounded-lg text-xs font-bold transition-all ${
+                    className={`cursor-pointer h-10 w-10 rounded-lg text-xs font-bold transition-all ${
                       currentPage === i + 1 
                       ? 'bg-accent text-accent-foreground shadow-[0_0_15px_rgba(34,211,238,0.3)]' 
                       : 'border border-border bg-card text-muted-foreground hover:border-accent hover:text-accent'
@@ -187,7 +189,7 @@ export default function Home() {
             <button 
               onClick={() => setCurrentPage(p => Math.min(companyData?.totalPages || 1, p + 1))}
               disabled={currentPage === (companyData?.totalPages || 1) || loading}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              className="cursor-pointer disabled:cursor-not-allowed flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
             >
                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
