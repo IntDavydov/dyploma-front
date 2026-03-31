@@ -12,59 +12,73 @@ interface Company {
   status?: "Synced" | "Pending" | "Offline";
 }
 
-interface PaginatedResponse {
-  data: Company[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
 export default function Home() {
-  const [companyData, setCompanyData] = useState<PaginatedResponse | null>(null);
+  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [regionFilter, setRegionFilter] = useState("All");
-
-  const fetchCompanies = async (page: number) => {
-    setLoading(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-      const res = await fetch(`${apiUrl}/api/companies?page=${page}&limit=20`);
-      if (!res.ok) throw new Error("Failed to fetch companies");
-      const result: PaginatedResponse = await res.json();
-      
-      // Enhance data with design properties
-      const enhancedData = result.data.map((c: any) => ({
-          ...c,
-          region: c.region || ["North America", "Europe", "Asia Pacific", "Latin America"][Math.floor(Math.random() * 4)],
-          skus: c.skus || Math.floor(Math.random() * 50000) + 5000,
-          status: c.status || ["Synced", "Pending", "Offline"][Math.floor(Math.random() * 3)]
-      }));
-      
-      setCompanyData({ ...result, data: enhancedData });
-    } catch (err) {
-      console.error("Error fetching companies:", err);
-      // Fallback for demo
-      const mockData: Company[] = [
-        { id: 1, name: "Apple", region: "North America", skus: 24300, status: "Synced" as const },
-        { id: 2, name: "Samsung", region: "Asia Pacific", skus: 41200, status: "Pending" as const },
-        { id: 3, name: "Gucci", region: "Europe", skus: 18700, status: "Synced" as const },
-      ];
-      setCompanyData({ data: mockData, total: 3, page: 1, limit: 20, totalPages: 1 });
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+  const itemsPerPage = 20;
 
   useEffect(() => {
-    fetchCompanies(currentPage);
-  }, [currentPage]);
+    async function fetchAllCompanies() {
+      setLoading(true);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        // Fetch a large limit to get all companies at once for local filtering
+        const res = await fetch(`${apiUrl}/api/companies?page=1&limit=100`);
+        if (!res.ok) throw new Error("Failed to fetch companies");
+        const result = await res.json();
+        
+        const regions = ["North America", "Europe", "Asia Pacific", "Latin America"];
+        const statuses = ["Synced", "Pending", "Offline"];
+        
+        const enhancedData = (result.data || []).map((c: any) => ({
+            ...c,
+            // Use ID to make the random assignment deterministic (stays the same on re-renders)
+            region: c.region || regions[c.id % regions.length],
+            skus: c.skus || ((c.id * 12345) % 45000) + 5000,
+            status: c.status || statuses[c.id % statuses.length]
+        }));
+        
+        setAllCompanies(enhancedData);
+      } catch (err) {
+        console.error("Error fetching companies:", err);
+        setAllCompanies([
+          { id: 1, name: "Apple", region: "North America", skus: 24300, status: "Synced" as const },
+          { id: 2, name: "Samsung", region: "Asia Pacific", skus: 41200, status: "Pending" as const },
+          { id: 3, name: "Gucci", region: "Europe", skus: 18700, status: "Synced" as const },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAllCompanies();
+  }, []);
 
-  const filteredCompanies = companyData?.data.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  // 1. Filter all companies
+  const filteredCompanies = allCompanies.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const matchesRegion = regionFilter === "All" || c.region === regionFilter;
+    return matchesSearch && matchesRegion;
+  });
+
+  // 2. Calculate pagination based on filtered results
+  const totalPages = Math.max(1, Math.ceil(filteredCompanies.length / itemsPerPage));
+  
+  // Ensure current page is valid after filtering
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [filteredCompanies.length, currentPage, totalPages]);
+
+  // 3. Slice for current page
+  const paginatedCompanies = filteredCompanies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="max-w-6xl mx-auto pb-20">
@@ -73,7 +87,7 @@ export default function Home() {
           Select a <span className="text-accent">Company</span>
         </h1>
         <p className="mt-4 max-w-lg text-muted-foreground">
-          Choose an organization to begin syncing inventory across your global supply chain ({companyData?.total || 0} brands available).
+          Choose an organization to begin syncing inventory across your global supply chain ({allCompanies.length} brands available).
         </p>
       </div>
 
@@ -86,24 +100,24 @@ export default function Home() {
           </div>
           <input
             type="text"
-            placeholder="Search companies on this page..."
+            placeholder="Search companies..."
             className="block w-full rounded-lg border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
           />
         </div>
         <div className="flex flex-wrap gap-2">
-           <FilterButton label="All" active={regionFilter === "All"} onClick={() => setRegionFilter("All")} />
-           <FilterButton label="North America" active={regionFilter === "North America"} onClick={() => setRegionFilter("North America")} />
-           <FilterButton label="Europe" active={regionFilter === "Europe"} onClick={() => setRegionFilter("Europe")} />
-           <FilterButton label="Asia Pacific" active={regionFilter === "Asia Pacific"} onClick={() => setRegionFilter("Asia Pacific")} />
-           <FilterButton label="Latin America" active={regionFilter === "Latin America"} onClick={() => setRegionFilter("Latin America")} />
+           <FilterButton label="All" active={regionFilter === "All"} onClick={() => { setRegionFilter("All"); setCurrentPage(1); }} />
+           <FilterButton label="North America" active={regionFilter === "North America"} onClick={() => { setRegionFilter("North America"); setCurrentPage(1); }} />
+           <FilterButton label="Europe" active={regionFilter === "Europe"} onClick={() => { setRegionFilter("Europe"); setCurrentPage(1); }} />
+           <FilterButton label="Asia Pacific" active={regionFilter === "Asia Pacific"} onClick={() => { setRegionFilter("Asia Pacific"); setCurrentPage(1); }} />
+           <FilterButton label="Latin America" active={regionFilter === "Latin America"} onClick={() => { setRegionFilter("Latin America"); setCurrentPage(1); }} />
         </div>
       </div>
 
       <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Showing {filteredCompanies.length} of {companyData?.total || 0} companies</p>
-          <p className="text-xs font-mono text-accent uppercase tracking-widest">Page {currentPage} of {companyData?.totalPages || 1}</p>
+          <p className="text-sm text-muted-foreground">Showing {filteredCompanies.length} companies</p>
+          <p className="text-xs font-mono text-accent uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
       </div>
 
       {loading ? (
@@ -115,7 +129,7 @@ export default function Home() {
       ) : (
         <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredCompanies.map((company) => (
+            {paginatedCompanies.map((company) => (
               <Link
                 key={company.id}
                 href={`/company/${company.id}`}
@@ -157,46 +171,54 @@ export default function Home() {
                 </div>
               </Link>
             ))}
+            
+            {paginatedCompanies.length === 0 && (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
+                No companies found for the selected region and search.
+              </div>
+            )}
           </div>
 
           {/* Pagination Controls */}
-          <div className="mt-16 flex items-center justify-center gap-4">
-            <button 
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1 || loading}
-              className="cursor-pointer disabled:cursor-not-allowed flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
-            >
-               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-               </svg>
-            </button>
-            
-            <div className="flex items-center gap-2">
-               {[...Array(companyData?.totalPages || 0)].map((_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`cursor-pointer h-10 w-10 rounded-lg text-xs font-bold transition-all ${
-                      currentPage === i + 1 
-                      ? 'bg-accent text-accent-foreground shadow-[0_0_15px_rgba(34,211,238,0.3)]' 
-                      : 'border border-border bg-card text-muted-foreground hover:border-accent hover:text-accent'
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-               ))}
-            </div>
+          {totalPages > 1 && (
+            <div className="mt-16 flex items-center justify-center gap-4">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1 || loading}
+                className="cursor-pointer disabled:cursor-not-allowed flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              >
+                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                 </svg>
+              </button>
+              
+              <div className="flex items-center gap-2">
+                 {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`cursor-pointer h-10 w-10 rounded-lg text-xs font-bold transition-all ${
+                        currentPage === i + 1 
+                        ? 'bg-accent text-accent-foreground shadow-[0_0_15px_rgba(34,211,238,0.3)]' 
+                        : 'border border-border bg-card text-muted-foreground hover:border-accent hover:text-accent'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                 ))}
+              </div>
 
-            <button 
-              onClick={() => setCurrentPage(p => Math.min(companyData?.totalPages || 1, p + 1))}
-              disabled={currentPage === (companyData?.totalPages || 1) || loading}
-              className="cursor-pointer disabled:cursor-not-allowed flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
-            >
-               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-               </svg>
-            </button>
-          </div>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages || loading}
+                className="cursor-pointer disabled:cursor-not-allowed flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:border-accent hover:text-accent disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              >
+                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                 </svg>
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
