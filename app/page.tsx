@@ -25,6 +25,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [regionFilter, setRegionFilter] = useState("All");
 
   const fetchCompanies = async (page: number) => {
     setLoading(true);
