@@ -34,13 +34,17 @@ export default function Home() {
         const regions = ["North America", "Europe", "Asia Pacific", "Latin America"];
         const statuses = ["Synced", "Pending", "Offline"];
         
-        const enhancedData = (result.data || []).map((c: any) => ({
-            ...c,
-            // Use ID to make the random assignment deterministic (stays the same on re-renders)
-            region: c.region || regions[c.id % regions.length],
-            skus: c.skus || ((c.id * 12345) % 45000) + 5000,
-            status: c.status || statuses[c.id % statuses.length]
-        }));
+        const enhancedData = (result.data || []).map((c: any, index: number) => {
+            // Safely parse ID, fallback to array index if ID is missing or completely non-numeric
+            const safeId = parseInt(c.id) || (c.id ? String(c.id).charCodeAt(0) : index);
+            
+            return {
+              ...c,
+              region: c.region || regions[safeId % regions.length],
+              skus: c.skus || ((safeId * 12345) % 45000) + 5000,
+              status: c.status || statuses[safeId % statuses.length]
+            };
+        });
         
         setAllCompanies(enhancedData);
       } catch (err) {
@@ -59,7 +63,7 @@ export default function Home() {
 
   // 1. Filter all companies
   const filteredCompanies = allCompanies.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (c.name || "").toLowerCase().includes(search.toLowerCase());
     const matchesRegion = regionFilter === "All" || c.region === regionFilter;
     return matchesSearch && matchesRegion;
   });
