@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             role: "system",
             content: `You are a professional supply chain analyst for the Shop-Sync Gateway. 
             Context: ${context}. 
-            Current Data: ${JSON.stringify(data).slice(0, 4000)}.
+            Current Data: ${JSON.stringify(data).slice(0, 20000)}.
             Rules: Keep answers extremely short (2-3 sentences max). Be precise and professional.`
           },
           ...messages

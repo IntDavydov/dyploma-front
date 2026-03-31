@@ -2,7 +2,6 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import AIChat from "@/app/components/AIChat";
 
 interface Product {
   id: number;
@@ -89,11 +88,6 @@ export default function InventoryPage({ params }: { params: Promise<{ id: string
           </table>
         </div>
       )}
-
-      <AIChat 
-        context={`Inventory for Company ID ${id}`} 
-        data={products} 
-      />
     </div>
   );
 }

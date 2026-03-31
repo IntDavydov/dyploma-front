@@ -2,7 +2,6 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import AIChat from "@/app/components/AIChat";
 
 interface Stats {
   totalSales: number;
@@ -92,11 +91,6 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
           </div>
         </>
       )}
-
-      <AIChat 
-        context={`Analytics for Company ID ${id}`} 
-        data={stats} 
-      />
     </div>
   );
 }

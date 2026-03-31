@@ -200,9 +200,11 @@ export default function Home() {
   );
 }
 
-function FilterButton({ label, active = false }: { label: string, active?: boolean }) {
+function FilterButton({ label, active = false, onClick }: { label: string, active?: boolean, onClick?: () => void }) {
   return (
-    <button className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+    <button 
+      onClick={onClick}
+      className={`cursor-pointer px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
       active 
       ? 'bg-accent text-accent-foreground shadow-[0_0_10px_rgba(34,211,238,0.2)]' 
       : 'bg-muted text-muted-foreground hover:bg-border hover:text-foreground'
