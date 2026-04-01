@@ -90,14 +90,14 @@ export default function GlobalAIChat() {
 
   return (
     <div className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 transition-all duration-300 ${isExpanded ? 'w-[calc(100vw-2rem)] md:w-[400px]' : 'w-auto'}`}>
-      <div className={`bg-card border border-accent/30 rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.15)] overflow-hidden transition-all duration-300 flex flex-col ${isExpanded ? 'h-[70vh] md:h-[500px]' : 'h-14 w-14'}`}>
+      <div className={`bg-card/90 backdrop-blur-xl border border-accent/30 rounded-3xl shadow-[0_0_40px_rgba(34,211,238,0.2)] overflow-hidden transition-all duration-300 flex flex-col ${isExpanded ? 'h-[75vh] md:h-[550px]' : 'h-16 w-16'}`}>
         
         {!isExpanded && (
           <button 
             onClick={() => setIsExpanded(true)}
-            className="w-full h-full flex items-center justify-center text-accent hover:bg-accent/10 transition-colors cursor-pointer"
+            className="w-full h-full flex items-center justify-center text-accent hover:bg-accent/10 transition-colors cursor-pointer active:scale-90"
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </button>
@@ -105,31 +105,39 @@ export default function GlobalAIChat() {
 
         {isExpanded && (
           <>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/40">
               <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="text-xs font-bold uppercase tracking-widest text-foreground">Global Analyst</span>
+                <span className="text-sm font-bold uppercase tracking-[0.15em] text-foreground">Global Analyst</span>
               </div>
-              <button onClick={() => setIsExpanded(false)} className="text-muted-foreground hover:text-accent p-1 cursor-pointer">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button 
+                onClick={() => setIsExpanded(false)} 
+                className="h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-accent cursor-pointer active:scale-90 transition-transform"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-hide">
               {messages.length === 0 && (
-                <div className="text-center mt-10 space-y-2 opacity-60">
-                  <p className="text-sm italic">I have access to all {globalData?.length || '...'} companies.</p>
-                  <p className="text-[10px] text-accent uppercase tracking-wider">Prompt Caching Active</p>
+                <div className="text-center mt-12 space-y-3 opacity-50">
+                  <p className="text-sm italic">Accessing database of {globalData?.length || '64'} companies...</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent animate-ping" />
+                    <p className="text-[10px] text-accent font-bold uppercase tracking-widest">System Ready</p>
+                  </div>
                 </div>
               )}
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[90%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                    m.role === 'user' ? 'bg-accent text-accent-foreground font-medium' : 'bg-muted text-foreground border border-border'
+                  <div className={`max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    m.role === 'user' 
+                    ? 'bg-accent text-accent-foreground font-semibold shadow-lg shadow-accent/10' 
+                    : 'bg-muted/80 text-foreground border border-border shadow-sm'
                   }`}>
                     {m.content}
                   </div>
@@ -137,27 +145,33 @@ export default function GlobalAIChat() {
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-muted border border-border rounded-2xl px-4 py-2 text-sm text-accent animate-pulse">Analyzing...</div>
+                  <div className="bg-muted/80 border border-border rounded-2xl px-4 py-3 text-sm text-accent animate-pulse">
+                    Synthesizing response...
+                  </div>
                 </div>
               )}
             </div>
 
-            <form onSubmit={handleSend} className="p-4 bg-card border-t border-border">
-              <div className="relative flex items-center">
+            <form onSubmit={handleSend} className="p-5 bg-card/50 border-t border-border">
+              <div className="relative flex items-center gap-3">
                 <input
                   type="text"
-                  placeholder={!dataLoaded ? "Syncing data..." : "Ask anything..."}
+                  placeholder={!dataLoaded ? "Syncing data..." : "Ask a question..."}
                   disabled={!dataLoaded}
-                  className="w-full bg-background border border-border rounded-xl py-3 pl-4 pr-12 text-sm text-foreground focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
+                  /* 
+                     CRITICAL MOBILE FIX: 
+                     Font size must be 16px (text-base) to prevent iOS auto-zoom 
+                  */
+                  className="flex-1 bg-background border border-border rounded-2xl py-3.5 px-5 text-base md:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all disabled:opacity-50"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                 />
                 <button 
                   type="submit" 
                   disabled={isLoading || !input.trim() || !dataLoaded}
-                  className="absolute right-2 p-2 text-accent hover:scale-110 transition-transform disabled:opacity-30 cursor-pointer"
+                  className="h-12 w-12 flex items-center justify-center bg-accent text-accent-foreground rounded-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 cursor-pointer shadow-lg shadow-accent/20"
                 >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </button>
