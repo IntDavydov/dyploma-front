@@ -30,7 +30,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur">
+        <header className="relative md:sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur">
           <div className="container mx-auto flex h-16 items-center justify-between px-6">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 bg-accent rounded-sm flex items-center justify-center">
