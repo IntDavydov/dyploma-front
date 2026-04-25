@@ -221,31 +221,39 @@ export default function NovaAIPage() {
 
   if (loading) return <Loading />;
 
+  if (!hasAccess) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-center p-8 relative z-10">
+         <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center max-w-md mx-auto"
+          >
+            <div className="w-24 h-24 bg-accent/10 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(0,229,255,0.2)] border border-accent/20">
+              <Star className="w-10 h-10 text-accent animate-pulse" />
+            </div>
+            <h1 className="text-4xl font-black text-white tracking-tighter mb-4">Nova AI is Restricted</h1>
+            <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
+              Intelligent market analysis is a premium feature. Please upgrade to <span className="text-white font-bold underline decoration-accent/50 underline-offset-4">Nova PLUS</span> or <span className="text-white font-bold underline decoration-purple-400/50 underline-offset-4">PRO</span> to unlock full access to DeepSeek-V3 intelligence.
+            </p>
+            <button 
+              onClick={() => router.push('/upgrade')}
+              className="bg-accent text-accent-foreground px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(0,229,255,0.4)] hover:shadow-[0_10px_50px_rgba(0,229,255,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              Explore Plans
+            </button>
+          </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={scrollRef}
       className="absolute inset-0 flex flex-col overflow-y-auto scroll-smooth"
     >
       <div className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full min-h-full">
-        {!hasAccess && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center text-center p-8 bg-transparent backdrop-blur-xl">
-             <div className="w-24 h-24 bg-accent/10 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(0,229,255,0.2)]">
-                <Star className="w-10 h-10 text-accent animate-pulse" />
-             </div>
-             <h1 className="text-4xl font-black text-white tracking-tighter mb-4">Nova AI is Restricted</h1>
-             <p className="text-muted-foreground text-lg max-w-md mb-10 leading-relaxed">
-               Intelligent market analysis is a premium feature. Please upgrade to <span className="text-white font-bold underline decoration-accent/50 underline-offset-4">Nova PLUS</span> or <span className="text-white font-bold underline decoration-purple-400/50 underline-offset-4">PRO</span> to unlock full access to DeepSeek-V3 intelligence.
-             </p>
-             <button 
-              onClick={() => router.push('/upgrade')}
-              className="bg-accent text-accent-foreground px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(0,229,255,0.4)] hover:shadow-[0_10px_50px_rgba(0,229,255,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
-             >
-               Explore Plans
-             </button>
-          </div>
-        )}
-
-        <div className={`flex-1 p-6 md:p-8 space-y-6 pb-24 transition-all duration-700 ${!hasAccess ? 'blur-2xl opacity-20 pointer-events-none grayscale' : ''}`}>
+        <div className={`flex-1 p-6 md:p-8 space-y-6 pb-24 transition-all duration-700`}>
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
               <Bot className="w-20 h-20 text-accent mb-6" />

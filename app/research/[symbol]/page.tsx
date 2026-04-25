@@ -157,6 +157,8 @@ export default function CompanyResearchPage({
 
   const sub = user?.subscription || 'NONE';
   const hasAccess = sub === 'PLUS' || sub === 'PRO';
+  const hasSignalAccess = sub === 'GO' || sub === 'PLUS' || sub === 'PRO';
+  
   const MAX_MESSAGES = sub === 'PRO' ? 50 : 30;
   const currentMessages = user?.messageCount || 0;
   const isLimitReached = currentMessages >= MAX_MESSAGES;
@@ -429,8 +431,8 @@ export default function CompanyResearchPage({
   const displayChangePercent = (displayChange / (data.history[data.history.length - 2]?.price || 1)) * 100;
   const isDisplayPositive = displayChange >= 0;
 
-  // LAYOUT PIECES
-  const TradeBlock = () => (
+  // JSX BLOCKS (Variables, not functions) to fix focus loss
+  const tradeBlockJSX = (
     <div className="relative z-10">
       <AnimatePresence>{toast && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto", marginBottom: 16 }} exit={{ opacity: 0, height: 0 }} className={`overflow-hidden px-4 py-3 mb-4 rounded-xl flex items-center gap-2 border ${toast.type === "success" ? "bg-success/20 text-success border-success/50" : "bg-danger/20 text-danger border-danger/50"}`}>
@@ -460,29 +462,19 @@ export default function CompanyResearchPage({
     </div>
   );
 
-  const ChatBlock = () => (
-    <>
+  const chatBlockJSX = hasAccess ? (
+    <div className="bg-gradient-to-br from-[#0f172a] via-accent/10 to-purple-900/30 backdrop-blur-xl border border-accent/40 rounded-2xl shadow-[0_0_20px_rgba(0,229,255,0.15)] flex flex-col h-full w-full relative overflow-hidden">
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-background/50 backdrop-blur-md relative z-10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2"><Star className="w-4 h-4 text-accent animate-pulse" /><span className="text-xs font-bold text-accent uppercase tracking-widest drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">Nova AI</span></div>
-            {hasAccess && (
-              <div className="bg-white/5 border border-white/10 px-2 py-0.5 rounded-md flex items-center gap-1.5">
-                <div className={`w-1 h-1 rounded-full ${isLimitReached ? 'bg-danger' : 'bg-accent'} animate-pulse`}></div>
-                <span className={`text-[9px] font-mono font-bold ${isLimitReached ? 'text-danger' : 'text-muted-foreground'}`}>{currentMessages}/{MAX_MESSAGES}</span>
-              </div>
-            )}
+            <div className="bg-white/5 border border-white/10 px-2 py-0.5 rounded-md flex items-center gap-1.5">
+              <div className={`w-1 h-1 rounded-full ${isLimitReached ? 'bg-danger' : 'bg-accent'} animate-pulse`}></div>
+              <span className={`text-[9px] font-mono font-bold ${isLimitReached ? 'text-danger' : 'text-muted-foreground'}`}>{currentMessages}/{MAX_MESSAGES}</span>
+            </div>
           </div>
       </div>
       <div className="flex-1 flex flex-col relative min-h-0">
-        {(!user?.subscription || (user.subscription !== 'PLUS' && user.subscription !== 'PRO')) && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center text-center p-6 bg-background/60 backdrop-blur-xl">
-             <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(0,229,255,0.2)]"><Star className="w-6 h-6 text-accent" /></div>
-             <p className="text-sm font-bold text-white mb-2">Nova PLUS Required</p>
-             <p className="text-[10px] text-muted-foreground leading-relaxed max-w-[180px] mb-4">Unlock real-time AI company analysis by upgrading to PLUS.</p>
-             <button onClick={() => router.push('/upgrade')} className="bg-accent text-accent-foreground px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all">Upgrade Now</button>
-          </div>
-        )}
-        <div ref={chatScrollRef} className={`flex-1 overflow-y-auto p-4 pb-32 space-y-4 scrollbar-hide relative z-10 ${(!user?.subscription || (user.subscription !== 'PLUS' && user.subscription !== 'PRO')) ? 'blur-2xl grayscale opacity-20 pointer-events-none' : ''}`}>
+        <div ref={chatScrollRef} className={`flex-1 overflow-y-auto p-4 pb-32 space-y-4 scrollbar-hide relative z-10`}>
           {chatMessages.length === 0 && <div className="h-full flex flex-col items-center justify-center text-center opacity-40"><p className="text-[11px] font-medium leading-relaxed">Ask me to analyze {data.symbol}'s market position...</p></div>}
           <AnimatePresence>
             {chatMessages.map((m, i) => (
@@ -493,7 +485,7 @@ export default function CompanyResearchPage({
           </AnimatePresence>
           {isChatLoading && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start"><div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2.5 text-[11px] text-accent animate-pulse">Thinking...</div></motion.div>}
         </div>
-        <div className={`absolute bottom-0 left-0 w-full pt-28 pb-8 flex flex-col items-center justify-end pointer-events-none bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent z-20 ${(!user?.subscription || (user.subscription !== 'PLUS' && user.subscription !== 'PRO')) ? 'blur-md opacity-30 grayscale' : ''} ${isLimitReached ? 'pointer-events-auto' : ''}`}>
+        <div className={`absolute bottom-0 left-0 w-full pt-28 pb-8 flex flex-col items-center justify-end pointer-events-none bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent z-20 ${isLimitReached ? 'pointer-events-auto' : ''}`}>
           <AnimatePresence>
             {isLimitReached && (
               <motion.div initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }} className="mb-4 px-6 py-4 bg-danger/20 backdrop-blur-xl border border-danger/50 text-danger rounded-2xl shadow-[0_0_30px_rgba(244,63,94,0.3)] pointer-events-auto max-w-[280px] text-center">
@@ -517,7 +509,14 @@ export default function CompanyResearchPage({
           </form>
         </div>
       </div>
-    </>
+    </div>
+  ) : (
+    <div className="flex-1 flex flex-col items-center justify-center text-center p-8 relative z-10 h-full">
+       <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,229,255,0.2)]"><Star className="w-8 h-8 text-accent animate-pulse" /></div>
+       <p className="text-base font-bold text-white mb-2 tracking-tight">Nova PLUS Required</p>
+       <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[200px] mb-6">Unlock real-time AI company analysis by upgrading to <span className="text-accent font-bold">PLUS</span>.</p>
+       <button onClick={() => router.push('/upgrade')} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer">Upgrade Now</button>
+    </div>
   );
 
   return (
@@ -548,20 +547,20 @@ export default function CompanyResearchPage({
           </motion.div>
           
           {/* Mobile Trade Position */}
-          <div className="lg-desktop:hidden w-full"><motion.div variants={itemVariants} className="bg-card/40 backdrop-blur-xl border-y border-border/50 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"><TradeBlock /></motion.div></div>
+          <div className="lg-desktop:hidden w-full"><motion.div variants={itemVariants} className="bg-card/40 backdrop-blur-xl border-y border-border/50 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">{tradeBlockJSX}</motion.div></div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mobile-ui:gap-6 items-stretch">
-            <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#0f172a] via-accent/20 to-purple-900/40 backdrop-blur-xl border-y mobile-ui:border border-accent/40 mobile-ui:rounded-2xl p-6 shadow-[0_0_20px_rgba(0,229,255,0.15)] hover:shadow-[0_0_40px_rgba(0,229,255,0.3)] relative overflow-hidden group hover:border-accent transition-all duration-700 transform hover:-translate-y-1">
-              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,229,255,0.1)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite] pointer-events-none"></div>
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/40 blur-[40px] rounded-full group-hover:bg-accent/60 transition-colors duration-700"></div>
-              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/30 blur-[40px] rounded-full group-hover:bg-purple-500/50 transition-colors duration-700"></div>
-              <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-all duration-1000 ease-out transform group-hover:scale-125 group-hover:rotate-12 origin-center"><Star className="w-32 h-32 text-accent drop-shadow-[0_0_15px_rgba(0,229,255,0.5)]" /></div>
-              <div className="relative z-10 h-full flex flex-col">
-                <h2 className="text-xs font-bold text-accent uppercase tracking-[0.2em] mb-4 flex items-center gap-2 drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]"><Star className="w-4 h-4 animate-pulse" /> Nova AI Signal</h2>
-                {(!user?.subscription || user.subscription === 'NONE') ? (
+            {/* AI Signal */}
+            <motion.div variants={itemVariants} className={`${hasSignalAccess ? "bg-gradient-to-br from-[#0f172a] via-accent/20 to-purple-900/40 backdrop-blur-xl border-y mobile-ui:border border-accent/40 mobile-ui:rounded-2xl" : ""} p-6 transition-all duration-700 transform hover:-translate-y-1 relative overflow-hidden group hover:border-accent`}>
+              {hasSignalAccess && (
+                <><div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,229,255,0.1)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_3s_infinite] pointer-events-none"></div><div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/40 blur-[40px] rounded-full group-hover:bg-accent/60 transition-colors duration-700"></div><div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/30 blur-[40px] rounded-full group-hover:bg-purple-500/50 transition-colors duration-700"></div><div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-all duration-1000 ease-out transform group-hover:scale-125 group-hover:rotate-12 origin-center"><Star className="w-32 h-32 text-accent drop-shadow-[0_0_15px_rgba(0,229,255,0.5)]" /></div></>
+              )}
+              <div className="relative z-10 h-full flex flex-col items-center justify-center text-center">
+                <h2 className="text-xs font-bold text-accent uppercase tracking-[0.2em] mb-4 flex items-center gap-2 drop-shadow-[0_0_5px_rgba(0,229,255,0.5)] self-start"><Star className="w-4 h-4 animate-pulse" /> Nova AI Signal</h2>
+                {!hasSignalAccess ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 py-4"><div className="p-3 bg-accent/10 rounded-full"><Zap className="w-6 h-6 text-accent animate-pulse" /></div><p className="text-sm font-bold text-foreground tracking-tight">Premium Analysis Locked</p><p className="text-[10px] text-muted-foreground leading-relaxed max-w-[200px]">If you want risk info buy at least GO subscription.</p><button onClick={() => router.push('/upgrade')} className="text-[10px] font-bold text-accent hover:underline uppercase tracking-widest cursor-pointer mt-2">Upgrade Now &rarr;</button></div>
                 ) : (
-                  <><div className="mb-5"><span className={`text-xl font-bold px-4 py-2 rounded-xl border shadow-[0_0_15px_rgba(0,0,0,0.2)] inline-block ${isBullish ? "bg-success/20 text-success border-success/40" : "bg-danger/20 text-danger border-danger/40"}`}>{risk.sentiment} / {risk.level} Risk</span></div><p className="text-foreground text-sm leading-relaxed font-medium drop-shadow-sm">{risk.summary}</p></>
+                  <><div className="mb-5 self-start text-left"><span className={`text-xl font-bold px-4 py-2 rounded-xl border shadow-[0_0_15px_rgba(0,0,0,0.2)] inline-block ${isBullish ? "bg-success/20 text-success border-success/40" : "bg-danger/20 text-danger border-danger/40"}`}>{risk.sentiment} / {risk.level} Risk</span></div><p className="text-foreground text-sm text-left leading-relaxed font-medium drop-shadow-sm">{risk.summary}</p></>
                 )}
               </div>
             </motion.div>
@@ -577,7 +576,7 @@ export default function CompanyResearchPage({
           </div>
 
           {/* Mobile Chat Position */}
-          <div className="lg-desktop:hidden w-full mt-1"><motion.div variants={itemVariants} className="bg-gradient-to-br from-[#0f172a] via-accent/10 to-purple-900/30 backdrop-blur-xl border-y border-accent/40 shadow-[0_0_20px_rgba(0,229,255,0.15)] flex flex-col h-[600px] w-full relative overflow-hidden"><ChatBlock /></motion.div></div>
+          <div className="lg-desktop:hidden w-full mt-1"><motion.div variants={itemVariants} className="flex flex-col h-[600px] w-full relative overflow-hidden">{chatBlockJSX}</motion.div></div>
 
           <motion.div variants={itemVariants} className="bg-card/40 backdrop-blur-xl border-y mobile-ui:border border-border/50 mobile-ui:rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Latest Headlines</h2>
@@ -599,10 +598,10 @@ export default function CompanyResearchPage({
         {/* SIDEBAR COLUMN (Desktop Only) */}
         <aside className="hidden lg-desktop:flex lg-desktop:col-span-4 flex-col gap-6 sticky top-6">
            <motion.div variants={itemVariants} className="bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] group overflow-hidden">
-             <TradeBlock />
+             {tradeBlockJSX}
            </motion.div>
-           <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#0f172a] via-accent/10 to-purple-900/30 backdrop-blur-xl border border-accent/40 rounded-2xl shadow-[0_0_20px_rgba(0,229,255,0.15)] flex flex-col h-[600px] group overflow-hidden">
-             <ChatBlock />
+           <motion.div variants={itemVariants} className="flex flex-col h-[600px] group overflow-hidden">
+             {chatBlockJSX}
            </motion.div>
         </aside>
       </div>
