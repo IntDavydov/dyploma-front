@@ -8,29 +8,65 @@ import Sidebar from "./Sidebar";
 import TopHeader from "./TopHeader";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const { login, user } = useAuthStore();
+  const { login, setUser, user, token } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   useEffect(() => {
     setMounted(true);
-    const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
-    if (token && userStr) {
+    const storedToken = localStorage.getItem("token");
+    const storedUserStr = localStorage.getItem("user");
+    if (storedToken && storedUserStr) {
       try {
-        const u = JSON.parse(userStr);
-        login(u, token);
+        const u = JSON.parse(storedUserStr);
+        login(u, storedToken);
       } catch (e) {
         console.error("Failed to parse user from local storage");
       }
     }
   }, [login]);
 
+  // Sync user profile from backend
+  useEffect(() => {
+    if (!token) return;
+
+    async function syncProfile() {
+      try {
+        const res = await fetch(`${apiUrl}/api/user/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const contentType = res.headers.get("content-type");
+        if (res.ok && contentType && contentType.includes("application/json")) {
+          const remoteUser = await res.json();
+          // Map backend fields to frontend interface
+          const normalizedUser = {
+            ...remoteUser,
+            name: remoteUser.username || remoteUser.name,
+            subscription: (remoteUser.subscriptionTier || remoteUser.subscription || 'NONE').toUpperCase(),
+            messageCount: Number(remoteUser.messageCount ?? remoteUser.message_count ?? 0),
+            chatsCreated: Number(remoteUser.chatsCreated ?? remoteUser.chats_created ?? 0)
+          };
+          setUser(normalizedUser);
+          localStorage.setItem("user", JSON.stringify(normalizedUser));
+        } else {
+          console.warn("Skipping profile sync: Backend returned non-JSON or error response.");
+        }
+      } catch (err) {
+        console.error("Failed to sync profile", err);
+      }
+    }
+
+    syncProfile();
+  }, [token, apiUrl, setUser]);
+
   if (!mounted) return null;
 
   const isLogin = pathname === '/login';
   const isNovaAI = pathname === '/research/nova-ai';
+  const isCompanyDetail = pathname.startsWith('/research/') && pathname !== '/research' && !isNovaAI;
 
   if (isLogin) {
     return <main className="flex-1 flex flex-col">{children}</main>;
@@ -49,7 +85,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <TopHeader />
-          <main className={`flex-1 overflow-y-auto scroll-smooth relative z-10 ${isNovaAI ? '' : 'p-6 md:p-8'}`}>
+          <main className={`flex-1 overflow-y-auto scroll-smooth relative z-10 ${isNovaAI || isCompanyDetail ? 'px-0 py-4 mobile-ui:p-8' : 'p-4 mobile-ui:p-8'}`}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}

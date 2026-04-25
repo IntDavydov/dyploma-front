@@ -78,12 +78,21 @@ export default function ResearchPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
+  const headerContainerRef = useRef<HTMLDivElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const handleTableScroll = () => {
-    if (!tableContainerRef.current || loadingMore || !hasNextPage) return;
+    if (!tableContainerRef.current) return;
     
-    const { scrollTop, scrollHeight, clientHeight } = tableContainerRef.current;
+    const { scrollTop, scrollHeight, clientHeight, scrollLeft } = tableContainerRef.current;
+    
+    // Sync header horizontal scroll
+    if (headerContainerRef.current) {
+      headerContainerRef.current.scrollLeft = scrollLeft;
+    }
+
+    if (loadingMore || !hasNextPage) return;
+    
     if (scrollHeight - scrollTop <= clientHeight + 100) {
       setLoadingMore(true);
       setCurrentPage((prev) => prev + 1);
@@ -136,43 +145,48 @@ export default function ResearchPage() {
         </div>
         
         {/* Header sits outside the scrolling container */}
-        <div className="border-b border-border/50">
+        <div ref={headerContainerRef} className="border-b border-border/50 overflow-hidden">
           <table className="w-full text-sm text-left border-collapse table-fixed">
             <thead className="text-[10px] text-muted-foreground uppercase tracking-widest bg-[#0b131e]">
               <tr>
-                <th className="px-6 py-4 font-bold w-[20%]">Ticker</th>
-                <th className="px-6 py-4 font-bold text-right w-[15%]">Price</th>
-                <th className="px-6 py-4 font-bold text-right w-[20%]">Chg %</th>
-                <th className="px-6 py-4 font-bold text-right w-[15%]">Volume</th>
-                <th className="px-6 py-4 font-bold text-right w-[15%]">Mkt Cap</th>
-                <th className="px-6 py-4 font-bold text-center w-[15%]">Action</th>
+                <th className="px-6 py-4 font-bold w-[60%] mobile-ui:w-[20%]">Ticker</th>
+                <th className="hidden mobile-ui:table-cell px-6 py-4 font-bold text-right mobile-ui:w-[15%]">Price</th>
+                <th className="hidden mobile-ui:table-cell px-6 py-4 font-bold text-right mobile-ui:w-[20%]">Chg %</th>
+                <th className="hidden mobile-ui:table-cell px-6 py-4 font-bold text-right mobile-ui:w-[15%]">Volume</th>
+                <th className="hidden mobile-ui:table-cell px-6 py-4 font-bold text-right mobile-ui:w-[15%]">Mkt Cap</th>
+                <th className="px-6 py-4 font-bold text-center w-[40%] mobile-ui:w-[15%]">Action</th>
               </tr>
             </thead>
           </table>
         </div>
 
         {/* Scrollable body */}
-        <div ref={tableContainerRef} onScroll={handleTableScroll} className="flex-1 overflow-auto">
+        <div ref={tableContainerRef} onScroll={handleTableScroll} className="flex-1 overflow-auto scrollbar-hide bg-background/20">
           <table className="w-full text-sm text-left border-collapse table-fixed">
             <tbody className="divide-y divide-border/30">
               {assets.map((asset, index) => {
                 const isBullish = asset.changePercent >= 0;
                 return (
                   <tr key={`${asset.symbol}-${index}`} onClick={() => router.push(`/research/${asset.symbol}`)} className="hover:bg-muted/30 cursor-pointer transition-colors group">
-                    <td className="px-6 py-4 w-[20%]">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-foreground tracking-tight">{asset.symbol}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium hidden sm:inline-block bg-background/50 px-2 py-0.5 rounded-md border border-border/50">{asset.name}</span>
+                    <td className="px-6 py-4 w-[60%] mobile-ui:w-[20%]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-muted border border-border/50 flex items-center justify-center font-bold text-[10px] shadow-inner shrink-0">
+                          {asset.symbol[0]}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-foreground truncate">{asset.symbol}</span>
+                          <span className="text-[10px] text-muted-foreground truncate hidden mobile-ui:inline">{asset.name}</span>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-mono font-medium text-right text-foreground w-[15%]">${asset.price.toFixed(2)}</td>
-                    <td className={`px-6 py-4 font-bold text-right w-[20%] ${isBullish ? 'text-success' : 'text-danger'}`}>
+                    <td className="hidden mobile-ui:table-cell px-6 py-4 font-mono font-medium text-right text-foreground mobile-ui:w-[15%]">${asset.price.toFixed(2)}</td>
+                    <td className={`hidden mobile-ui:table-cell px-6 py-4 font-bold text-right mobile-ui:w-[20%] ${isBullish ? 'text-success' : 'text-danger'}`}>
                       {isBullish ? <ArrowUpRight className="w-3.5 h-3.5 inline mr-1" /> : <ArrowDownRight className="w-3.5 h-3.5 inline mr-1" />}
                       {Math.abs(asset.changePercent).toFixed(2)}%
                     </td>
-                    <td className="px-6 py-4 font-mono text-right text-muted-foreground opacity-80 w-[15%]">{toCompactValue(asset.volume)}</td>
-                    <td className="px-6 py-4 font-mono text-right text-muted-foreground opacity-80 w-[15%]">{toCompactValue(asset.marketCap)}</td>
-                    <td className="px-6 py-4 text-center w-[15%]">
+                    <td className="hidden mobile-ui:table-cell px-6 py-4 font-mono text-right text-muted-foreground opacity-80 mobile-ui:w-[15%]">{toCompactValue(asset.volume)}</td>
+                    <td className="hidden mobile-ui:table-cell px-6 py-4 font-mono text-right text-muted-foreground opacity-80 mobile-ui:w-[15%]">{toCompactValue(asset.marketCap)}</td>
+                    <td className="px-6 py-4 text-center w-[40%] mobile-ui:w-[15%]">
                       <div className="flex justify-center">
                         <span className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border inline-flex items-center justify-center min-w-[75px] ${getActionLabel(asset.rating).className}`}>
                           {getActionLabel(asset.rating).label}

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../store/authStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send } from "lucide-react";
+import { Bot, Send, Star, Zap } from "lucide-react";
 import Loading from "../../components/Loading";
 
 interface Message {
@@ -11,13 +13,75 @@ interface Message {
 }
 
 export default function NovaAIPage() {
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { user, incrementMessageCount, updateUsage, deleteChat } = useAuthStore();
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isInitialLoad = useRef(true);
+
+  const sub = user?.subscription || 'NONE';
+  const hasAccess = sub === 'PLUS' || sub === 'PRO';
+  
+  const MAX_MESSAGES = sub === 'PRO' ? 50 : 30;
+  const currentMessages = user?.messageCount || 0;
+  const isLimitReached = currentMessages >= MAX_MESSAGES;
+
+  const canRecreate = (sub === 'PRO' && (user?.chatsCreated || 0) < 3);
+
+  const createNewChat = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiUrl}/api/chats`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title: "New Analysis" })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActiveChatId(data.id);
+        return data.id;
+      }
+    } catch (err) {
+      console.error("Failed to create new chat session", err);
+    }
+    return null;
+  };
+
+  const handleDeleteChat = async () => {
+    if (!canRecreate) return;
+    
+    setIsLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const token = localStorage.getItem("token");
+      
+      // First delete current history
+      const res = await fetch(`${apiUrl}/api/chat/history`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        deleteChat();
+        setMessages([]);
+        // Then initialize a fresh session ID
+        await createNewChat();
+      }
+    } catch (err) {
+      console.error("Failed to reset chat session", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -46,55 +110,90 @@ export default function NovaAIPage() {
   }, []);
 
   useEffect(() => {
-    async function loadHistory() {
+    async function initChat() {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const token = localStorage.getItem("token");
+      
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/chat/history`,
-          {
+        // 1. Fetch existing chats to find the active one
+        const chatsRes = await fetch(`${apiUrl}/api/chats`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        let targetId = null;
+        if (chatsRes.ok) {
+          const chats = await chatsRes.json();
+          if (chats && chats.length > 0) {
+            targetId = chats[0].id; // Use the most recent chat
+            setActiveChatId(targetId);
+          }
+        }
+
+        // 2. If no chat exists, create one
+        if (!targetId) {
+          targetId = await createNewChat();
+        }
+
+        // 3. Load history for the active chat
+        if (targetId) {
+          const historyRes = await fetch(`${apiUrl}/api/chat/${targetId}/history`, {
             headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        if (res.ok) {
-          const history = await res.json();
-          setMessages(history);
+          });
+          if (historyRes.ok) {
+            const history = await historyRes.json();
+            setMessages(history);
+          }
         }
       } catch (err) {
-        console.error("Failed to load chat history", err);
+        console.error("Failed to initialize AI session", err);
       } finally {
         setLoading(false);
       }
     }
-    loadHistory();
+    initChat();
   }, []);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isLimitReached) return;
+
+    let chatId = activeChatId;
+    if (!chatId) {
+      chatId = await createNewChat();
+    }
+    if (!chatId) return;
 
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    incrementMessageCount();
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`${apiUrl}/api/chat`, {
+      const response = await fetch(`${apiUrl}/api/chat/${chatId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage],
+          messages: [{ role: 'user', content: userMessage.content }],
         }),
       });
 
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.error || "Failed to fetch AI response");
+
+      // Real-Time Sync: Use backend's accountant response to update usage instantly
+      if (result.messageCount !== undefined || result.message_count !== undefined) {
+        const count = Number(result.messageCount ?? result.message_count);
+        const resets = result.chatsCreated ?? result.chats_created;
+        updateUsage(count, resets);
+      }
 
       setMessages((prev) => [
         ...prev,
@@ -128,8 +227,25 @@ export default function NovaAIPage() {
       className="absolute inset-0 flex flex-col overflow-y-auto scroll-smooth"
     >
       <div className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full min-h-full">
-        {/* Scrollable area - moved overflow to the parent to move scrollbar to screen edge */}
-        <div className="flex-1 p-6 md:p-8 space-y-6 pb-24">
+        {!hasAccess && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center text-center p-8 bg-transparent backdrop-blur-xl">
+             <div className="w-24 h-24 bg-accent/10 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(0,229,255,0.2)]">
+                <Star className="w-10 h-10 text-accent animate-pulse" />
+             </div>
+             <h1 className="text-4xl font-black text-white tracking-tighter mb-4">Nova AI is Restricted</h1>
+             <p className="text-muted-foreground text-lg max-w-md mb-10 leading-relaxed">
+               Intelligent market analysis is a premium feature. Please upgrade to <span className="text-white font-bold underline decoration-accent/50 underline-offset-4">Nova PLUS</span> or <span className="text-white font-bold underline decoration-purple-400/50 underline-offset-4">PRO</span> to unlock full access to DeepSeek-V3 intelligence.
+             </p>
+             <button 
+              onClick={() => router.push('/upgrade')}
+              className="bg-accent text-accent-foreground px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(0,229,255,0.4)] hover:shadow-[0_10px_50px_rgba(0,229,255,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+             >
+               Explore Plans
+             </button>
+          </div>
+        )}
+
+        <div className={`flex-1 p-6 md:p-8 space-y-6 pb-24 transition-all duration-700 ${!hasAccess ? 'blur-2xl opacity-20 pointer-events-none grayscale' : ''}`}>
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
               <Bot className="w-20 h-20 text-accent mb-6" />
@@ -174,8 +290,41 @@ export default function NovaAIPage() {
         {/* Floating Input Area */}
         {/*sticky bottom-0 w-full pt-4 pb-8 flex justify-center pointer-events-none from-background via-background to-transparent"*/}
         <div className="sticky bottom-0 w-full pt-4 pb-2 flex flex-col items-center justify-end pointer-events-none from-background via-background to-transparent">
+
           <AnimatePresence>
-            {input.length > 300 && (
+            {isLimitReached && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                className="mb-4 px-6 py-4 bg-danger/20 backdrop-blur-xl border border-danger/50 text-danger rounded-2xl shadow-[0_0_30px_rgba(244,63,94,0.3)] pointer-events-auto max-w-sm text-center"
+              >
+                <p className="text-sm font-bold mb-2">Chat session messages count exceeded</p>
+                <p className="text-[10px] opacity-80 leading-relaxed mb-4">
+                  {sub === 'PRO' 
+                    ? "Please delete this chat to create a new one." 
+                    : "Please update your subscription for more messages per chat."}
+                </p>
+                {canRecreate && (
+                  <button 
+                    onClick={handleDeleteChat}
+                    className="bg-danger text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  >
+                    Delete & Reset Chat
+                  </button>
+                )}
+                {!canRecreate && (
+                  <button 
+                    onClick={() => router.push('/upgrade')}
+                    className="bg-accent text-accent-foreground text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  >
+                    Upgrade Plan
+                  </button>
+                )}
+              </motion.div>
+            )}
+
+            {input.length > 300 && !isLimitReached && (
               <motion.div
                 initial={{ opacity: 0, y: 10, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -189,13 +338,36 @@ export default function NovaAIPage() {
 
           <form
             onSubmit={handleSend}
-            className="relative flex items-center w-[75%] focus-within:w-[95%] transition-all duration-300 ease-in-out px-2 pointer-events-auto"
+            className={`relative flex items-center w-[75%] focus-within:w-[95%] transition-all duration-300 ease-in-out px-2 pointer-events-auto ${(!hasAccess || isLimitReached) ? 'blur-md pointer-events-none opacity-50' : ''}`}
           >
+            {/* Embedded Actions (Left) */}
+            <div className="absolute left-6 z-10 flex items-center gap-3">
+              {sub === 'PRO' && (
+                 <button 
+                  type="button"
+                  onClick={handleDeleteChat}
+                  disabled={!canRecreate || messages.length === 0}
+                  className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all active:scale-90 disabled:opacity-20 cursor-pointer"
+                  title="Reset Session"
+                 >
+                    <Zap className="w-3.5 h-3.5 text-accent" />
+                 </button>
+              )}
+              {hasAccess && (
+                <div className="bg-white/5 border border-white/5 px-3 py-1 rounded-lg">
+                  <span className={`text-[10px] font-mono font-bold ${isLimitReached ? 'text-danger' : 'text-accent'}`}>
+                    {currentMessages}/{MAX_MESSAGES}
+                  </span>
+                </div>
+              )}
+            </div>
+
             <input
               ref={inputRef}
+              disabled={!hasAccess || isLimitReached}
               type="text"
-              placeholder="Message"
-              className={`w-full bg-[#181e29]/80 backdrop-blur-xl border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-transparent"} rounded-full py-5 pl-7 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.2)]`}
+              placeholder={isLimitReached ? "Limit Reached" : "Message"}
+              className={`w-full bg-[#181e29]/80 backdrop-blur-xl border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-transparent"} rounded-full py-5 pl-36 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.2)]`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
@@ -208,9 +380,9 @@ export default function NovaAIPage() {
 
             <button
               type="submit"
-              disabled={isLoading || !input.trim() || input.length > 300}
+              disabled={isLoading || !input.trim() || input.length > 300 || !hasAccess || isLimitReached}
               className={`absolute right-4 p-2.5 rounded-full transition-all cursor-pointer ${
-                input.length > 300
+                input.length > 300 || isLimitReached
                   ? "bg-danger/10 text-danger opacity-50 cursor-not-allowed"
                   : "bg-transparent text-muted-foreground hover:text-accent hover:bg-accent/10 disabled:opacity-20"
               }`}

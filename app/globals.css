@@ -24,6 +24,10 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --breakpoint-xl-desktop: 1600px;
+  --breakpoint-lg-desktop: 1400px;
+  --breakpoint-mobile-ui: 900px;
 }
 
 :root {
