@@ -1,0 +1,10 @@
+              <p className="text-[10px] font-medium text-center text-muted-foreground mt-6 leading-relaxed">
+                Market orders are executed immediately at the live simulated price.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

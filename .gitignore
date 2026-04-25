@@ -21,3 +21,6 @@ yarn-error.log*
 
 # OS Files (since you're on Arch)
 .DS_Store
+
+references
+references/

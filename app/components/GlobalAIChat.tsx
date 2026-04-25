@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 interface Message {
   role: "user" | "assistant";
@@ -8,6 +9,7 @@ interface Message {
 }
 
 export default function GlobalAIChat() {
+  const pathname = usePathname();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -87,6 +89,8 @@ export default function GlobalAIChat() {
       setIsLoading(false);
     }
   };
+
+  if (pathname !== "/") return null;
 
   return (
     <div className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 transition-all duration-300 ${isExpanded ? 'w-[calc(100vw-2rem)] md:w-[400px]' : 'w-auto'}`}>
