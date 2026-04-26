@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import "./globals.css";
@@ -17,7 +17,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Nova Invest",
   description: "Enterprise Data & Logistics Gateway",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
