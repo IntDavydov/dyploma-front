@@ -113,7 +113,7 @@ export default function LoginPage() {
 
   return (
     <div 
-      className="flex-1 min-h-screen w-full flex flex-col items-center justify-center bg-[#090E17] relative overflow-hidden selection:bg-accent/30 selection:text-accent"
+      className="flex-1 min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden selection:bg-accent/30 selection:text-accent"
       style={{ minHeight: '100dvh' }}
     >
       
@@ -130,9 +130,9 @@ export default function LoginPage() {
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-[480px] relative z-10 px-4 m-auto"
       >
-        <div className="bg-[#111827]/60 backdrop-blur-3xl border border-white/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
+        <div className="bg-card/60 backdrop-blur-3xl border border-foreground/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
           {/* Subtle Shimmer edge */}
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.03)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_5s_infinite] pointer-events-none"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(var(--foreground),0.03)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_5s_infinite] pointer-events-none"></div>
 
           {/* Logo & Header */}
           <div className="flex flex-col items-center mb-6 md:mb-10 text-center relative z-10">
@@ -144,7 +144,7 @@ export default function LoginPage() {
                <Star className="w-8 h-8 md:w-10 md:h-10 text-white relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
             </motion.div>
             
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-2 md:mb-3 flex items-center gap-2">
+            <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter mb-2 md:mb-3 flex items-center gap-2">
               Nova <span className="text-accent drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]">Invest</span>
             </h1>
             <p className="text-muted-foreground text-xs md:text-sm font-medium tracking-wide uppercase flex items-center gap-2">
@@ -155,10 +155,10 @@ export default function LoginPage() {
           <div className="space-y-5 md:space-y-8 relative z-10">
             {/* Feature Badges */}
             <div className="flex justify-center gap-3">
-               <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 flex items-center gap-2 text-[10px] font-bold text-foreground/80 uppercase tracking-widest shadow-sm">
+               <div className="px-3 py-1.5 rounded-full bg-foreground/5 border border-foreground/5 flex items-center gap-2 text-[10px] font-bold text-foreground/80 uppercase tracking-widest shadow-sm">
                   <ShieldCheck className="w-3 h-3 text-accent" /> Secure
                </div>
-               <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 flex items-center gap-2 text-[10px] font-bold text-foreground/80 uppercase tracking-widest shadow-sm">
+               <div className="px-3 py-1.5 rounded-full bg-foreground/5 border border-foreground/5 flex items-center gap-2 text-[10px] font-bold text-foreground/80 uppercase tracking-widest shadow-sm">
                   <Zap className="w-3 h-3 text-emerald-400" /> Real-time
                </div>
             </div>
@@ -187,7 +187,7 @@ export default function LoginPage() {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-[#090E17]/60 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 pl-12 pr-4 text-sm text-white placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-inner"
+                    className="w-full bg-background/60 border border-foreground/10 rounded-xl md:rounded-2xl py-3 md:py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-inner"
                   />
                 </div>
 
@@ -199,7 +199,7 @@ export default function LoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#090E17]/60 border border-white/10 rounded-xl md:rounded-2xl py-3 md:py-4 pl-12 pr-4 text-sm text-white placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-inner"
+                    className="w-full bg-background/60 border border-foreground/10 rounded-xl md:rounded-2xl py-3 md:py-4 pl-12 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-inner"
                   />
                 </div>
               </div>
@@ -224,16 +224,16 @@ export default function LoginPage() {
                   setUsername("");
                   setPassword("");
                 }}
-                className="w-full text-[9px] md:text-[10px] text-muted-foreground hover:text-white font-bold uppercase tracking-[0.25em] transition-colors pt-1"
+                className="w-full text-[9px] md:text-[10px] text-muted-foreground hover:text-foreground font-bold uppercase tracking-[0.25em] transition-colors pt-1"
               >
                 {isLoginMode ? "Request New Credential &rarr;" : "Return to Login Console &rarr;"}
               </button>
             </form>
 
             <div className="relative flex items-center py-1 md:py-2">
-              <div className="flex-grow border-t border-white/5"></div>
+              <div className="flex-grow border-t border-foreground/10"></div>
               <span className="flex-shrink mx-4 text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Global Auth</span>
-              <div className="flex-grow border-t border-white/5"></div>
+              <div className="flex-grow border-t border-foreground/10"></div>
             </div>
 
             <div className="flex flex-col gap-3 md:gap-4 relative z-10">
@@ -249,7 +249,7 @@ export default function LoginPage() {
 
                <button 
                   onClick={handleDemoBypass}
-                  className="w-full py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] md:text-[10px] font-bold text-white uppercase tracking-widest transition-all active:scale-95 cursor-pointer shadow-sm flex items-center justify-center gap-2"
+                  className="w-full py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-foreground/5 text-[9px] md:text-[10px] font-bold text-foreground uppercase tracking-widest transition-all active:scale-95 cursor-pointer shadow-sm flex items-center justify-center gap-2"
                >
                  <ArrowRight className="w-3 h-3 text-accent" /> System Demo Bypass
                </button>

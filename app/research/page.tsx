@@ -147,7 +147,7 @@ export default function ResearchPage() {
         {/* Header sits outside the scrolling container */}
         <div ref={headerContainerRef} className="border-b border-border/50 overflow-hidden">
           <table className="w-full text-sm text-left border-collapse table-fixed">
-            <thead className="text-[10px] text-muted-foreground uppercase tracking-widest bg-[#0b131e]">
+            <thead className="text-[10px] text-muted-foreground uppercase tracking-widest bg-muted/50">
               <tr>
                 <th className="px-6 py-4 font-bold w-[60%] mobile-ui:w-[20%]">Ticker</th>
                 <th className="hidden mobile-ui:table-cell px-6 py-4 font-bold text-right mobile-ui:w-[15%]">Price</th>

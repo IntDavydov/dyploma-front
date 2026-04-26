@@ -464,10 +464,10 @@ export default function CompanyResearchPage({
 
   const chatBlockJSX = hasAccess ? (
     <div className="bg-gradient-to-br from-[#0f172a] via-accent/10 to-purple-900/30 backdrop-blur-xl border border-accent/40 rounded-2xl shadow-[0_0_20px_rgba(0,229,255,0.15)] flex flex-col h-full w-full relative overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-background/50 backdrop-blur-md relative z-10 shrink-0">
+      <div className="flex items-center justify-between p-4 border-b border-foreground/10 bg-background/50 backdrop-blur-md relative z-10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2"><Star className="w-4 h-4 text-accent animate-pulse" /><span className="text-xs font-bold text-accent uppercase tracking-widest drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">Nova AI</span></div>
-            <div className="bg-white/5 border border-white/10 px-2 py-0.5 rounded-md flex items-center gap-1.5">
+            <div className="bg-foreground/5 border border-foreground/10 px-2 py-0.5 rounded-md flex items-center gap-1.5">
               <div className={`w-1 h-1 rounded-full ${isLimitReached ? 'bg-danger' : 'bg-accent'} animate-pulse`}></div>
               <span className={`text-[9px] font-mono font-bold ${isLimitReached ? 'text-danger' : 'text-muted-foreground'}`}>{currentMessages}/{MAX_MESSAGES}</span>
             </div>
@@ -479,19 +479,19 @@ export default function CompanyResearchPage({
           <AnimatePresence>
             {chatMessages.map((m, i) => (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-lg ${m.role === "user" ? "bg-accent text-accent-foreground font-medium" : "bg-white/5 backdrop-blur-md text-foreground border border-white/10"}`}>{m.content}</div>
+                <div className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-lg ${m.role === "user" ? "bg-accent text-accent-foreground font-medium" : "bg-foreground/5 backdrop-blur-md text-foreground border border-foreground/10"}`}>{m.content}</div>
               </motion.div>
             ))}
           </AnimatePresence>
-          {isChatLoading && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start"><div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2.5 text-[11px] text-accent animate-pulse">Thinking...</div></motion.div>}
+          {isChatLoading && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start"><div className="bg-foreground/5 backdrop-blur-md border border-foreground/10 rounded-xl px-4 py-2.5 text-[11px] text-accent animate-pulse">Thinking...</div></motion.div>}
         </div>
-        <div className={`absolute bottom-0 left-0 w-full pt-28 pb-8 flex flex-col items-center justify-end pointer-events-none bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent z-20 ${isLimitReached ? 'pointer-events-auto' : ''}`}>
+        <div className={`absolute bottom-0 left-0 w-full pt-28 pb-8 flex flex-col items-center justify-end pointer-events-none bg-gradient-to-t from-background via-background/80 to-transparent z-20 ${isLimitReached ? 'pointer-events-auto' : ''}`}>
           <AnimatePresence>
             {isLimitReached && (
               <motion.div initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }} className="mb-4 px-6 py-4 bg-danger/20 backdrop-blur-xl border border-danger/50 text-danger rounded-2xl shadow-[0_0_30px_rgba(244,63,94,0.3)] pointer-events-auto max-w-[280px] text-center">
                 <p className="text-[11px] font-bold mb-1">Messages count exceeded</p>
                 <p className="text-[9px] opacity-80 leading-relaxed mb-3">{sub === 'PRO' ? "Please reset this chat." : "Please upgrade for more messages."}</p>
-                {canRecreate && <button onClick={handleDeleteChat} className="bg-danger text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer">Reset Chat</button>}
+                {canRecreate && <button onClick={handleDeleteChat} className="bg-danger text-danger-foreground text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer">Reset Chat</button>}
                 {!canRecreate && <button onClick={() => router.push('/upgrade')} className="bg-accent text-accent-foreground text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer">Upgrade</button>}
               </motion.div>
             )}
@@ -501,9 +501,9 @@ export default function CompanyResearchPage({
           </AnimatePresence>
           <form onSubmit={handleChatSend} className={`relative flex items-center w-[85%] focus-within:w-[95%] transition-all duration-300 ease-in-out px-2 pointer-events-auto ${isLimitReached ? 'blur-md pointer-events-none opacity-50' : ''}`}>
             <div className="absolute left-4 z-10 flex items-center gap-2">
-              {sub === 'PRO' && <button type="button" onClick={handleDeleteChat} disabled={!canRecreate || chatMessages.length === 0} className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all active:scale-90 disabled:opacity-20 cursor-pointer" title="Reset Session"><Zap className="w-3 h-3 text-accent" /></button>}
+              {sub === 'PRO' && <button type="button" onClick={handleDeleteChat} disabled={!canRecreate || chatMessages.length === 0} className="p-1.5 bg-foreground/5 hover:bg-foreground/10 rounded-lg border border-foreground/10 transition-all active:scale-90 disabled:opacity-20 cursor-pointer" title="Reset Session"><Zap className="w-3 h-3 text-accent" /></button>}
             </div>
-            <input ref={chatInputRef} disabled={!user?.subscription || (user.subscription !== 'PLUS' && user.subscription !== 'PRO') || isLimitReached} type="text" placeholder={isLimitReached ? "Limit Reached" : "Message"} className={`w-full bg-[#1e293b] backdrop-blur-xl border ${chatInput.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-white/10"} rounded-full py-4 ${sub === 'PRO' ? 'pl-14' : 'pl-6'} pr-20 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${chatInput.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[0_10px_40px_rgba(0,0,0,0.6)] disabled:opacity-20`} value={chatInput} onChange={(e) => setChatInput(e.target.value)} />
+            <input ref={chatInputRef} disabled={!user?.subscription || (user.subscription !== 'PLUS' && user.subscription !== 'PRO') || isLimitReached} type="text" placeholder={isLimitReached ? "Limit Reached" : "Message"} className={`w-full bg-card backdrop-blur-xl border ${chatInput.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-foreground/10"} rounded-full py-4 ${sub === 'PRO' ? 'pl-14' : 'pl-6'} pr-20 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${chatInput.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[0_10px_40px_rgba(0,0,0,0.1)] disabled:opacity-20`} value={chatInput} onChange={(e) => setChatInput(e.target.value)} />
             <div className={`absolute right-12 text-[9px] font-mono font-medium transition-opacity duration-300 pointer-events-none ${chatInput.length > 250 ? "opacity-100" : "opacity-0"} ${chatInput.length > 300 ? "text-danger drop-shadow-[0_0_5px_rgba(244,63,94,0.8)]" : "text-muted-foreground"}`}>{chatInput.length}/300</div>
             <button type="submit" disabled={isChatLoading || !chatInput.trim() || chatInput.length > 300 || !user?.subscription || (user.subscription !== 'PLUS' && user.subscription !== 'PRO') || isLimitReached} className={`absolute right-2.5 p-1.5 rounded-full transition-all cursor-pointer ${chatInput.length > 300 || isLimitReached ? 'bg-danger/10 text-danger opacity-50 cursor-not-allowed' : 'bg-transparent text-muted-foreground hover:text-accent hover:bg-accent/10 disabled:opacity-20'}`}><Send className="w-4 h-4" /></button>
           </form>
@@ -513,7 +513,7 @@ export default function CompanyResearchPage({
   ) : (
     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 relative z-10 h-full">
        <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,229,255,0.2)]"><Star className="w-8 h-8 text-accent animate-pulse" /></div>
-       <p className="text-base font-bold text-white mb-2 tracking-tight">Nova PLUS Required</p>
+       <p className="text-base font-bold text-foreground mb-2 tracking-tight">Nova PLUS Required</p>
        <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[200px] mb-6">Unlock real-time AI company analysis by upgrading to <span className="text-accent font-bold">PLUS</span>.</p>
        <button onClick={() => router.push('/upgrade')} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer">Upgrade Now</button>
     </div>

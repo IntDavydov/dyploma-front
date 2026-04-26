@@ -47,6 +47,8 @@ export default function PortfolioPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<"holdings" | "history">("holdings");
   const [loading, setLoading] = useState(true);
+  const [historyPage, setHistoryPage] = useState(1);
+  const HISTORY_PAGE_SIZE = 10;
 
   useEffect(() => {
     if (!user) {

@@ -232,9 +232,9 @@ export default function NovaAIPage() {
             <div className="w-24 h-24 bg-accent/10 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(0,229,255,0.2)] border border-accent/20">
               <Star className="w-10 h-10 text-accent animate-pulse" />
             </div>
-            <h1 className="text-4xl font-black text-white tracking-tighter mb-4">Nova AI is Restricted</h1>
+            <h1 className="text-4xl font-black text-foreground tracking-tighter mb-4">Nova AI is Restricted</h1>
             <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-              Intelligent market analysis is a premium feature. Please upgrade to <span className="text-white font-bold underline decoration-accent/50 underline-offset-4">Nova PLUS</span> or <span className="text-white font-bold underline decoration-purple-400/50 underline-offset-4">PRO</span> to unlock full access to DeepSeek-V3 intelligence.
+              Intelligent market analysis is a premium feature. Please upgrade to <span className="text-foreground font-bold underline decoration-accent/50 underline-offset-4">Nova PLUS</span> or <span className="text-foreground font-bold underline decoration-purple-400/50 underline-offset-4">PRO</span> to unlock full access to DeepSeek-V3 intelligence.
             </p>
             <button 
               onClick={() => router.push('/upgrade')}
@@ -274,7 +274,7 @@ export default function NovaAIPage() {
                   className={`max-w-[85%] rounded-3xl px-6 py-4 text-sm leading-relaxed shadow-lg ${
                     m.role === "user"
                       ? "bg-accent text-accent-foreground font-medium"
-                      : "bg-white/5 backdrop-blur-md text-foreground border border-white/10"
+                      : "bg-foreground/5 backdrop-blur-md text-foreground border border-foreground/10"
                   }`}
                 >
                   {m.content}
@@ -288,7 +288,7 @@ export default function NovaAIPage() {
               animate={{ opacity: 1 }}
               className="flex justify-start"
             >
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 text-sm text-accent animate-pulse">
+              <div className="bg-foreground/5 backdrop-blur-md border border-foreground/10 rounded-2xl px-6 py-4 text-sm text-accent animate-pulse">
                 Nova is thinking...
               </div>
             </motion.div>
@@ -355,14 +355,14 @@ export default function NovaAIPage() {
                   type="button"
                   onClick={handleDeleteChat}
                   disabled={!canRecreate || messages.length === 0}
-                  className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all active:scale-90 disabled:opacity-20 cursor-pointer"
+                  className="p-2 bg-foreground/5 hover:bg-foreground/10 rounded-xl border border-foreground/10 transition-all active:scale-90 disabled:opacity-20 cursor-pointer"
                   title="Reset Session"
                  >
                     <Zap className="w-3.5 h-3.5 text-accent" />
                  </button>
               )}
               {hasAccess && (
-                <div className="bg-white/5 border border-white/5 px-3 py-1 rounded-lg">
+                <div className="bg-foreground/5 border border-foreground/10 px-3 py-1 rounded-lg">
                   <span className={`text-[10px] font-mono font-bold ${isLimitReached ? 'text-danger' : 'text-accent'}`}>
                     {currentMessages}/{MAX_MESSAGES}
                   </span>
@@ -375,7 +375,7 @@ export default function NovaAIPage() {
               disabled={!hasAccess || isLimitReached}
               type="text"
               placeholder={isLimitReached ? "Limit Reached" : "Message"}
-              className={`w-full bg-[#181e29]/80 backdrop-blur-xl border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-transparent"} rounded-full py-5 pl-36 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.2)]`}
+              className={`w-full bg-card backdrop-blur-xl border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-foreground/10"} rounded-full py-5 pl-36 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.1)]`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
