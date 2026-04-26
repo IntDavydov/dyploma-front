@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../store/authStore";
-import { ArrowUpRight, ArrowDownRight, Wallet, PieChart, Activity } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Wallet, PieChart, Activity, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 import Loading from "../components/Loading";
 
@@ -48,7 +48,9 @@ export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState<"holdings" | "history">("holdings");
   const [loading, setLoading] = useState(true);
   const [historyPage, setHistoryPage] = useState(1);
+  const [holdingsPage, setHoldingsPage] = useState(1);
   const HISTORY_PAGE_SIZE = 10;
+  const HOLDINGS_PAGE_SIZE = 10;
 
   useEffect(() => {
     if (!user) {
@@ -174,6 +176,12 @@ export default function PortfolioPage() {
   const totalAccountValue = (user?.balance || 0) + totalHoldingsValue;
   const pnlPercent = (todaysPnl / (totalAccountValue - todaysPnl)) * 100 || 0;
 
+  const totalHistoryPages = Math.max(1, Math.ceil(transactions.length / HISTORY_PAGE_SIZE));
+  const paginatedTransactions = transactions.slice((historyPage - 1) * HISTORY_PAGE_SIZE, historyPage * HISTORY_PAGE_SIZE);
+
+  const totalHoldingsPages = Math.max(1, Math.ceil(holdingsList.length / HOLDINGS_PAGE_SIZE));
+  const paginatedHoldings = holdingsList.slice((holdingsPage - 1) * HOLDINGS_PAGE_SIZE, holdingsPage * HOLDINGS_PAGE_SIZE);
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -282,7 +290,7 @@ export default function PortfolioPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
-                {holdingsList.map(([symbol, holding]) => {
+                {paginatedHoldings.map(([symbol, holding]) => {
                   const isPositive = holding.gainLoss >= 0;
                   return (
                     <tr key={symbol} className="hover:bg-muted/30 transition-colors group">
@@ -322,6 +330,28 @@ export default function PortfolioPage() {
                 })}
               </tbody>
             </table>
+            
+            {totalHoldingsPages > 1 && (
+              <div className="flex items-center justify-between p-4 border-t border-border/50 bg-background/20">
+                <button 
+                  onClick={() => setHoldingsPage(p => Math.max(1, p - 1))}
+                  disabled={holdingsPage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted/50 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                <div className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                  <span className="font-bold text-foreground">{holdingsPage}</span> / {totalHoldingsPages}
+                </div>
+                <button 
+                  onClick={() => setHoldingsPage(p => Math.min(totalHoldingsPages, p + 1))}
+                  disabled={holdingsPage === totalHoldingsPages}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted/50 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
           )
         ) : transactions.length === 0 ? (
@@ -348,7 +378,7 @@ export default function PortfolioPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
-                {transactions.map((tx) => {
+                {paginatedTransactions.map((tx) => {
                   const isBuy = tx.type.toLowerCase() === 'buy';
                   const total = tx.quantity * Number(tx.price);
                   const dateObj = new Date(tx.timestamp);
@@ -379,6 +409,28 @@ export default function PortfolioPage() {
                 })}
               </tbody>
             </table>
+            
+            {totalHistoryPages > 1 && (
+              <div className="flex items-center justify-between p-4 border-t border-border/50 bg-background/20">
+                <button 
+                  onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                  disabled={historyPage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted/50 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                <div className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                  <span className="font-bold text-foreground">{historyPage}</span> / {totalHistoryPages}
+                </div>
+                <button 
+                  onClick={() => setHistoryPage(p => Math.min(totalHistoryPages, p + 1))}
+                  disabled={historyPage === totalHistoryPages}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted/50 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </motion.div>

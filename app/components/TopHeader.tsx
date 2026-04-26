@@ -146,14 +146,15 @@ export default function TopHeader() {
   }
 
   return (
-    <header className={`h-24 px-4 md:px-8 flex items-center justify-between ${isMobileMenuOpen ? 'bg-background/95' : 'bg-background/60 border-b border-border/40'} backdrop-blur-3xl sticky top-0 z-[60] shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300`}>
+    <>
+    <header className={`h-24 px-4 md:px-8 flex items-center justify-between ${isMobileMenuOpen ? 'bg-background' : 'bg-background/60 border-b border-border/40'} backdrop-blur-3xl sticky top-0 z-[60] shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300`}>
       
       <div className="flex items-center gap-4">
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={`flex mobile-ui:hidden w-11 h-11 rounded-xl items-center justify-center transition-all cursor-pointer relative z-[70] ${isMobileMenuOpen ? 'bg-foreground/10 text-accent border border-foreground/20' : 'bg-foreground/5 backdrop-blur-md border border-foreground/10 text-muted-foreground hover:text-accent'}`}
+          className={`flex mobile-ui:hidden w-11 h-11 rounded-xl items-center justify-center transition-all cursor-pointer relative z-[70] ${isMobileMenuOpen ? 'bg-transparent text-accent' : 'bg-foreground/5 backdrop-blur-md border border-foreground/10 text-muted-foreground hover:text-accent'}`}
         >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-6 h-6" />}
         </button>
 
         <div className="hidden mobile-ui:flex flex-col justify-center">
@@ -240,49 +241,51 @@ export default function TopHeader() {
 
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-foreground/30 backdrop-blur-md z-[55] mobile-ui:hidden"
-            />
-            
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, opacity: { duration: 0.2 } }}
-              className="absolute top-full left-0 w-full bg-background/95 backdrop-blur-3xl border-b border-border/40 z-[56] shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden mobile-ui:hidden"
-            >
-               <div className="p-6 space-y-8 border-t border-border/40">
-                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="flex items-center gap-4 pb-6 border-b border-foreground/5">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-black text-white shadow-[0_0_20px_rgba(0,229,255,0.3)] border border-foreground/10 relative overflow-hidden"><div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2s_infinite]"></div><span className="relative z-10 text-sm">{initials}</span></div>
-                    <div><p className="text-sm font-bold text-foreground tracking-tight">{userName}</p><div className="flex items-center gap-2 mt-0.5"><SubIcon className="w-3 h-3 text-accent" /><span className="text-[10px] font-black text-accent uppercase tracking-widest">{user?.subscription} TIER</span></div></div>
-                 </motion.div>
-                 <nav className="grid grid-cols-1 gap-2">
-                    {navItems.map((item, i) => {
-                      const isActive = pathname === item.href || (item.name === "Overview" && (pathname === "/research" || pathname.startsWith("/research/")));
-                      const Icon = item.icon;
-                      return (
-                        <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + (i * 0.05) }} key={item.name} onClick={() => router.push(item.href)} className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group active:scale-[0.98] ${isActive ? 'bg-accent/10 text-accent border border-accent/20' : 'text-foreground/60 hover:bg-foreground/5'}`}><div className="flex items-center gap-4"><Icon className={`w-5 h-5 ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]' : 'opacity-70'}`} /><span className="font-bold uppercase tracking-[0.2em] text-[11px]">{item.name}</span></div><ChevronDown className="w-4 h-4 -rotate-90 opacity-20 group-hover:opacity-100 transition-opacity" /></motion.button>
-                      );
-                    })}
-                 </nav>
-                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} onClick={() => router.push('/upgrade')} className="relative p-5 rounded-[2rem] bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-foreground/10 shadow-2xl group cursor-pointer overflow-hidden active:scale-95 transition-transform">
-                    <div className="absolute -top-10 -right-10 w-24 h-24 bg-accent/20 blur-[30px] rounded-full group-hover:bg-accent/40 transition-colors duration-500"></div>
-                    <div className="relative z-10 flex items-center justify-between">
-                       <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center border border-accent/30 shadow-[inset_0_0_10px_rgba(0,229,255,0.2)]"><SubIcon className="w-5 h-5 text-accent animate-pulse" /></div><div><p className="text-[10px] font-black text-accent uppercase tracking-widest">Membership Status</p><p className="text-base font-bold text-white tracking-tight">Nova {user?.subscription}</p></div></div>
-                       <button className="px-4 py-2 bg-accent text-accent-foreground rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(0,229,255,0.4)]">Manage</button>
-                    </div>
-                 </motion.div>
-                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="pt-2"><button onClick={handleLogout} className="flex items-center justify-center gap-3 w-full p-4 rounded-2xl text-danger hover:bg-danger/10 transition-all border border-transparent hover:border-danger/20 cursor-pointer active:scale-95"><LogOut className="w-4 h-4" /><span className="font-bold uppercase tracking-widest text-[10px]">Establish Disconnect</span></button></motion.div>
-               </div>
-            </motion.div>
-          </>
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'calc(100dvh - 6rem)' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30, opacity: { duration: 0.2 } }}
+            className="absolute top-full left-0 w-full bg-background backdrop-blur-3xl border-b border-border/40 z-[56] shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-y-auto scrollbar-hide mobile-ui:hidden"
+          >
+             <div className="p-6 space-y-8 border-t border-border/40">
+               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="flex items-center gap-4 pb-6 border-b border-foreground/5">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-black text-white shadow-[0_0_20px_rgba(0,229,255,0.3)] border border-foreground/10 relative overflow-hidden"><div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2s_infinite]"></div><span className="relative z-10 text-sm">{initials}</span></div>
+                  <div><p className="text-sm font-bold text-foreground tracking-tight">{userName}</p><div className="flex items-center gap-2 mt-0.5"><SubIcon className="w-3 h-3 text-accent" /><span className="text-[10px] font-black text-accent uppercase tracking-widest">{user?.subscription} TIER</span></div></div>
+               </motion.div>
+               <nav className="grid grid-cols-1 gap-2">
+                  {navItems.map((item, i) => {
+                    const isActive = pathname === item.href || (item.name === "Overview" && (pathname === "/research" || pathname.startsWith("/research/")));
+                    const Icon = item.icon;
+                    return (
+                      <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + (i * 0.05) }} key={item.name} onClick={() => router.push(item.href)} className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group active:scale-[0.98] ${isActive ? 'bg-accent/10 text-accent border border-accent/20' : 'text-foreground/60 hover:bg-foreground/5'}`}><div className="flex items-center gap-4"><Icon className={`w-5 h-5 ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]' : 'opacity-70'}`} /><span className="font-bold uppercase tracking-[0.2em] text-[11px]">{item.name}</span></div><ChevronDown className="w-4 h-4 -rotate-90 opacity-20 group-hover:opacity-100 transition-opacity" /></motion.button>
+                    );
+                  })}
+               </nav>
+               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} onClick={() => router.push('/upgrade')} className="relative p-5 rounded-[2rem] bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-foreground/10 shadow-2xl group cursor-pointer overflow-hidden active:scale-95 transition-transform">
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-accent/20 blur-[30px] rounded-full group-hover:bg-accent/40 transition-colors duration-500"></div>
+                  <div className="relative z-10 flex items-center justify-between">
+                     <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center border border-accent/30 shadow-[inset_0_0_10px_rgba(0,229,255,0.2)]"><SubIcon className="w-5 h-5 text-accent animate-pulse" /></div><div><p className="text-[10px] font-black text-accent uppercase tracking-widest">Membership Status</p><p className="text-base font-bold text-white tracking-tight">Nova {user?.subscription}</p></div></div>
+                     <button className="px-4 py-2 bg-accent text-accent-foreground rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(0,229,255,0.4)]">Manage</button>
+                  </div>
+               </motion.div>
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="pt-2"><button onClick={handleLogout} className="flex items-center justify-center gap-3 w-full p-4 rounded-2xl text-danger hover:bg-danger/10 transition-all border border-transparent hover:border-danger/20 cursor-pointer active:scale-95"><LogOut className="w-4 h-4" /><span className="font-bold uppercase tracking-widest text-[10px]">Establish Disconnect</span></button></motion.div>
+             </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>
+    <AnimatePresence>
+      {isMobileMenuOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 bg-foreground/30 backdrop-blur-md z-[55] mobile-ui:hidden"
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }
