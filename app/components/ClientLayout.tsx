@@ -85,7 +85,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <TopHeader />
-          <main className={`flex-1 overflow-y-auto scroll-smooth relative z-10 ${isNovaAI || isCompanyDetail ? 'px-0 py-4 mobile-ui:p-8' : 'p-4 mobile-ui:p-8'}`}>
+          <main className={`flex-1 overflow-y-auto scroll-smooth relative z-10 ${isNovaAI ? 'p-0' : isCompanyDetail ? 'px-0 py-4 mobile-ui:p-8' : 'p-4 mobile-ui:p-8'}`}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}

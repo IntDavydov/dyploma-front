@@ -118,7 +118,8 @@ export default function PortfolioPage() {
           if (histRes.ok) {
             const histData = await histRes.json();
             const txArray = Array.isArray(histData) ? histData : (histData.data || histData.history || []);
-            setTransactions(txArray);
+            const sortedTxArray = txArray.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            setTransactions(sortedTxArray);
           }
         } catch (histErr) {
           console.error("Failed to load history", histErr);

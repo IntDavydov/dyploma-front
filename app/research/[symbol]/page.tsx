@@ -592,6 +592,11 @@ export default function CompanyResearchPage({
              <div className="text-sm text-foreground/80 leading-relaxed space-y-4">
                {data.profile.description.split(". ").map((s, i) => (<p key={i}>{s}{s.endsWith(".") ? "" : "."}</p>))}
              </div>
+             <div className="mt-8 pt-6 border-t border-border/50 flex gap-6 text-xs overflow-x-auto scrollbar-hide">
+               <div className="flex flex-col"><span className="text-muted-foreground uppercase tracking-widest text-[9px] mb-1">Sector</span><span className="text-accent font-bold whitespace-nowrap">{data.profile.sector}</span></div>
+               <div className="flex flex-col"><span className="text-muted-foreground uppercase tracking-widest text-[9px] mb-1">Industry</span><span className="text-foreground font-medium whitespace-nowrap">{data.profile.industry}</span></div>
+               <div className="flex flex-col"><span className="text-muted-foreground uppercase tracking-widest text-[9px] mb-1">Employees</span><span className="text-foreground font-medium whitespace-nowrap">{data.profile.employees.toLocaleString()}</span></div>
+             </div>
           </motion.div>
         </div>
 
