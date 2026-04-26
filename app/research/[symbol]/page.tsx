@@ -435,9 +435,9 @@ export default function CompanyResearchPage({
   const tradeBlockJSX = (
     <div className="relative z-10">
       <AnimatePresence>{toast && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto", marginBottom: 16 }} exit={{ opacity: 0, height: 0 }} className={`overflow-hidden px-4 py-3 mb-4 rounded-xl flex items-center gap-2 border ${toast.type === "success" ? "bg-success/20 text-success border-success/50" : "bg-danger/20 text-danger border-danger/50"}`}>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className={`absolute top-0 left-0 right-0 z-50 overflow-hidden px-4 py-3 rounded-xl flex items-center gap-2 border shadow-2xl ${toast.type === "success" ? "bg-success text-success-foreground border-success" : "bg-danger text-danger-foreground border-danger"}`}>
           {toast.type === "success" ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
-          <span className="text-xs font-bold tracking-wide">{toast.message}</span>
+          <span className="text-xs font-bold tracking-wide drop-shadow-sm">{toast.message}</span>
         </motion.div>
       )}</AnimatePresence>
       <h2 className="text-xl font-bold text-foreground tracking-tight mb-6 flex items-center gap-2">Trade <span className="px-2 py-0.5 bg-muted/80 text-foreground text-sm rounded border border-border/50">{data.symbol}</span></h2>
