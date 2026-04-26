@@ -113,7 +113,7 @@ body {
 /* Custom scrollbar */
 @layer base {
   input, select, textarea {
-    @apply text-base;
+    font-size: 16px !important;
   }
 }
 

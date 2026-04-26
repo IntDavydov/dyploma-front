@@ -151,7 +151,7 @@ export default function TopHeader() {
     <header className={`h-24 px-4 md:px-8 flex items-center justify-between ${isMobileMenuOpen ? 'bg-background' : 'bg-background/60 border-b border-border/40'} backdrop-blur-3xl sticky top-0 z-[60] shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300`}>
       
       {/* Left Section: Menu & Title */}
-      <div className="flex items-center gap-4 w-[280px] md:w-[320px]">
+      <div className="flex items-center gap-4 shrink-0">
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className={`flex mobile-ui:hidden w-11 h-11 rounded-xl items-center justify-center transition-all cursor-pointer relative z-[70] ${isMobileMenuOpen ? 'bg-transparent text-accent' : 'bg-foreground/5 backdrop-blur-md border border-foreground/10 text-muted-foreground hover:text-accent'}`}
@@ -165,16 +165,16 @@ export default function TopHeader() {
         </div>
       </div>
 
-      {/* Middle: Search (Desktop Only position) */}
-      <div ref={searchContainerRef} className="relative flex-1 max-w-md mx-4 hidden md:block">
+      {/* Middle: Search (Responsive) */}
+      <div ref={searchContainerRef} className="relative flex-1 mx-2 md:max-w-md md:mx-4 block">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
         <input 
           type="text" 
-          placeholder="Search markets..." 
+          placeholder="Search..." 
           value={searchQuery}
           onFocus={() => { setSearchOpen(true); loadSearchItems(); }}
           onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); loadSearchItems(); }}
-          className="w-full bg-foreground/5 backdrop-blur-md border border-foreground/10 rounded-full py-2.5 pl-12 pr-10 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-inner"
+          className="w-full bg-foreground/5 backdrop-blur-md border border-foreground/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-inner"
         />
         <AnimatePresence>
           {searchOpen && searchQuery.trim().length > 0 && (
@@ -191,7 +191,7 @@ export default function TopHeader() {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2 md:gap-4 justify-end w-[280px] md:w-[320px]">
+      <div className="flex items-center gap-2 md:gap-4 justify-end shrink-0">
         <div className="hidden sm:flex items-center gap-3 border-r border-foreground/5 pr-4 mr-2">
            <button className="w-10 h-10 rounded-xl bg-foreground/5 border border-foreground/5 flex items-center justify-center text-muted-foreground hover:text-accent transition-all relative group">
              <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -222,6 +222,12 @@ export default function TopHeader() {
           className="absolute top-24 left-0 w-full bg-background backdrop-blur-3xl border-b border-border/40 z-[56] shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-y-auto scrollbar-hide mobile-ui:hidden"
         >
           <div className="p-6 space-y-8 border-t border-border/40">
+             {/* Quick Profile Header */}
+             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="flex items-center gap-4 pb-6 border-b border-foreground/5">
+               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-black text-white shadow-[0_0_20px_rgba(0,229,255,0.3)] border border-foreground/10 relative overflow-hidden"><div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2s_infinite]"></div><span className="relative z-10 text-sm">{initials}</span></div>
+               <div><p className="text-sm font-bold text-foreground tracking-tight">{userName}</p><div className="flex items-center gap-2 mt-0.5"><SubIcon className="w-3 h-3 text-accent" /><span className="text-[10px] font-black text-accent uppercase tracking-widest">{user?.subscription} TIER</span></div></div>
+             </motion.div>
+
              <nav className="grid grid-cols-1 gap-2">
                 {navItems.map((item, i) => {
                   const isActive = pathname === item.href || (item.name === "Overview" && (pathname === "/research" || pathname.startsWith("/research/")));
@@ -231,8 +237,17 @@ export default function TopHeader() {
                   );
                 })}
              </nav>
-           </div>
-        </motion.div>
+
+             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} onClick={() => router.push('/upgrade')} className="relative p-5 rounded-[2rem] bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-foreground/10 shadow-2xl group cursor-pointer overflow-hidden active:scale-95 transition-transform">
+                 <div className="absolute -top-10 -right-10 w-24 h-24 bg-accent/20 blur-[30px] rounded-full group-hover:bg-accent/40 transition-colors duration-500"></div>
+                 <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center border border-accent/30 shadow-[inset_0_0_10px_rgba(0,229,255,0.2)]"><SubIcon className="w-5 h-5 text-accent animate-pulse" /></div><div><p className="text-[10px] font-black text-accent uppercase tracking-widest">Membership Status</p><p className="text-base font-bold text-white tracking-tight">Nova {user?.subscription}</p></div></div>
+                    <button className="px-4 py-2 bg-accent text-accent-foreground rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(0,229,255,0.4)]">Manage</button>
+                 </div>
+             </motion.div>
+
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="pt-2"><button onClick={handleLogout} className="flex items-center justify-center gap-3 w-full p-4 rounded-2xl text-danger hover:bg-danger/10 transition-all border border-transparent hover:border-danger/20 cursor-pointer active:scale-95"><LogOut className="w-4 h-4" /><span className="font-bold uppercase tracking-widest text-[10px]">Establish Disconnect</span></button></motion.div>
+          </div>        </motion.div>
       )}
     </AnimatePresence>
     </>
