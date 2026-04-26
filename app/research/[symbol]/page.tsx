@@ -187,12 +187,12 @@ export default function CompanyResearchPage({
   };
 
   const handleDeleteChat = async () => {
-    if (!canRecreate) return;
+    if (!canRecreate || !activeChatId) return;
     
     setIsChatLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/api/chat/history`, {
+      const res = await fetch(`${apiUrl}/api/chats/${activeChatId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -201,6 +201,8 @@ export default function CompanyResearchPage({
         deleteChat();
         setChatMessages([]);
         await createNewChat();
+      } else {
+        console.error("Failed to delete chat:", await res.json());
       }
     } catch (err) {
       console.error("Failed to delete chat", err);

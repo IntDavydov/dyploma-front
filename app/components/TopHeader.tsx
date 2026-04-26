@@ -151,15 +151,15 @@ export default function TopHeader() {
     <header className={`h-24 px-4 md:px-8 flex items-center justify-between ${isMobileMenuOpen ? 'bg-background' : 'bg-background/60 border-b border-border/40'} backdrop-blur-3xl sticky top-0 z-[60] shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300`}>
       
       {/* Left Section: Menu & Title */}
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-4 w-auto md:w-[280px] shrink-0">
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={`flex mobile-ui:hidden w-11 h-11 rounded-xl items-center justify-center transition-all cursor-pointer relative z-[70] ${isMobileMenuOpen ? 'bg-transparent text-accent' : 'bg-foreground/5 backdrop-blur-md border border-foreground/10 text-muted-foreground hover:text-accent'}`}
+          className={`flex mobile-ui:hidden w-10 h-10 rounded-xl items-center justify-center transition-all cursor-pointer relative z-[70] ${isMobileMenuOpen ? 'bg-transparent text-accent' : 'bg-foreground/5 backdrop-blur-md border border-foreground/10 text-muted-foreground hover:text-accent'}`}
         >
-          {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-6 h-6" />}
+          {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        <div className="hidden mobile-ui:flex flex-col justify-center">
+        <div className="hidden mobile-ui:flex flex-col justify-center truncate">
           <h2 className="text-[10px] font-bold text-accent uppercase tracking-[0.3em] mb-1 drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]">{pageTitle}</h2>
           <h1 className="text-sm lg:text-lg font-extrabold text-foreground tracking-tight drop-shadow-sm truncate">{greeting}</h1>
         </div>

@@ -58,7 +58,7 @@ export default function NovaAIPage() {
   };
 
   const handleDeleteChat = async () => {
-    if (!canRecreate) return;
+    if (!canRecreate || !activeChatId) return;
 
     setIsLoading(true);
     try {
@@ -66,7 +66,7 @@ export default function NovaAIPage() {
       const token = localStorage.getItem("token");
 
       // First delete current history
-      const res = await fetch(`${apiUrl}/api/chat/history`, {
+      const res = await fetch(`${apiUrl}/api/chats/${activeChatId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -268,7 +268,7 @@ export default function NovaAIPage() {
   return (
     <div
       ref={scrollRef}
-      className="absolute inset-0 flex flex-col overflow-y-auto scroll-smooth"
+      className="absolute inset-0 flex flex-col overflow-y-auto scroll-smooth overflow-x-hidden"
     >
       <div className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full min-h-full">
         <div
@@ -427,19 +427,32 @@ export default function NovaAIPage() {
             </button>
           </form>
           {/* THE OVERLAY: Absolute at bottom, high Z-index to hide messages */}
-          <div className="absolute bottom-0 left-0 w-full h-32 pointer-events-none z-20 overflow-hidden">
-            {/* LAYER 1: The standard vertical fade for the whole width */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          {/* THE OVERLAY: Fixed width set to w-screen to span the whole viewport */}
+          <div
+            className="absolute bottom-0 left-0 w-screen h-40 pointer-events-none z-20 overflow-hidden overflow-x-hidden"
+            style={{
+              /* 1. THE MASK: Applied to the PARENT div. 
+       This feathers the top of the entire container so no solid line is possible. */
+              maskImage:
+                "linear-gradient(to top, black 0%, black 25%, transparent 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to top, black 0%, black 25%, transparent 100%)",
+            }}
+          >
+            {/* LAYER 1: The standard vertical fade using your CSS variable */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
 
-            {/* LAYER 2: The Right-Side Anchor with a VERTICAL fade added */}
-            {/* We use a linear-gradient to go from solid #0c0f1b at the bottom to transparent at the top */}
+            {/* LAYER 2: The Right-Side Anchor */}
             <div
-              className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-[#0c0f1b] to-transparent"
+              className="absolute inset-0 pointer-events-none"
               style={{
-                maskImage:
-                  "linear-gradient(to top, black 20%, transparent 100%)",
-                WebkitMaskImage:
-                  "linear-gradient(to top, black 20%, transparent 100%)",
+                /* FIX: Adjusted stops to be sequential (20% -> 50% -> 90%) 
+         This creates a natural falloff without 'solid' rings. */
+                background:
+                  "radial-gradient(circle at bottom right, #0c0f1b 0%, #0c0f1b 25%, rgba(12, 15, 27, 0.4) 60%, transparent 90%)",
+
+                /* Subtle blur to smudge any sub-pixel aliasing */
+                filter: "blur(6px)",
               }}
             />
           </div>
