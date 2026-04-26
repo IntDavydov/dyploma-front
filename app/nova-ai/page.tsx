@@ -446,8 +446,8 @@ export default function NovaAIPage() {
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                /* FIX: Adjusted stops to be sequential (20% -> 50% -> 90%) 
-         This creates a natural falloff without 'solid' rings. */
+                /* Adjusted stops to be sequential (20% -> 50% -> 90%) 
+                  This creates a natural falloff without 'solid' rings. */
                 background:
                   "radial-gradient(circle at bottom right, #0c0f1b 0%, #0c0f1b 25%, rgba(12, 15, 27, 0.4) 60%, transparent 90%)",
 
