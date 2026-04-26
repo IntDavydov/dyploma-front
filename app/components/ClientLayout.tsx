@@ -65,7 +65,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   if (!mounted) return null;
 
   const isLogin = pathname === '/login';
-  const isNovaAI = pathname === '/research/nova-ai';
+  const isNovaAI = pathname === '/nova-ai';
   const isCompanyDetail = pathname.startsWith('/research/') && pathname !== '/research' && !isNovaAI;
 
   if (isLogin) {

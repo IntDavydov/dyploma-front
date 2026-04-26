@@ -33,9 +33,8 @@ export default function Sidebar() {
   const navItems = [
     { name: "Overview", href: "/research", icon: LayoutGrid },
     { name: "Portfolio", href: "/portfolio", icon: Briefcase },
-    { name: "Nova AI", href: "/research/nova-ai", icon: Star },
+    { name: "Nova AI", href: "/nova-ai", icon: Star },
   ];
-
   const getSubIcon = () => {
     const tier = user?.subscription || 'NONE';
     if (tier === 'GO') return Zap;
@@ -64,7 +63,9 @@ export default function Sidebar() {
       {/* Main Nav */}
       <div className="flex-1 px-3 xl-desktop:px-4 py-6 space-y-2 overflow-y-auto scrollbar-hide">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.name === "Overview" && pathname === "/research");
+          const isActive = 
+            pathname === item.href || 
+            (item.name === "Overview" && (pathname === "/research" || pathname.startsWith("/research/")));
           const Icon = item.icon;
           return (
             <Link

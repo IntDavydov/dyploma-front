@@ -56,7 +56,7 @@ export default function TopHeader() {
   const navItems = [
     { name: "Overview", href: "/research", icon: LayoutGrid },
     { name: "Portfolio", href: "/portfolio", icon: Briefcase },
-    { name: "Nova AI", href: "/research/nova-ai", icon: Star },
+    { name: "Nova AI", href: "/nova-ai", icon: Star },
   ];
 
   const getSubIcon = () => {
@@ -263,7 +263,7 @@ export default function TopHeader() {
                  </motion.div>
                  <nav className="grid grid-cols-1 gap-2">
                     {navItems.map((item, i) => {
-                      const isActive = pathname === item.href || (item.name === "Overview" && pathname === "/research");
+                      const isActive = pathname === item.href || (item.name === "Overview" && (pathname === "/research" || pathname.startsWith("/research/")));
                       const Icon = item.icon;
                       return (
                         <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + (i * 0.05) }} key={item.name} onClick={() => router.push(item.href)} className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all group active:scale-[0.98] ${isActive ? 'bg-accent/10 text-accent border border-accent/20' : 'text-white/60 hover:bg-white/5'}`}><div className="flex items-center gap-4"><Icon className={`w-5 h-5 ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]' : 'opacity-70'}`} /><span className="font-bold uppercase tracking-[0.2em] text-[11px]">{item.name}</span></div><ChevronDown className="w-4 h-4 -rotate-90 opacity-20 group-hover:opacity-100 transition-opacity" /></motion.button>

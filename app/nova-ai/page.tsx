@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "../store/authStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, Star, Zap } from "lucide-react";
-import Loading from "../../components/Loading";
+import Loading from "../components/Loading";
 
 interface Message {
   role: "user" | "assistant";
