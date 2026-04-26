@@ -375,7 +375,7 @@ export default function NovaAIPage() {
               disabled={!hasAccess || isLimitReached}
               type="text"
               placeholder={isLimitReached ? "Limit Reached" : "Message"}
-              className={`w-full bg-card backdrop-blur-xl border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-foreground/10"} rounded-full py-5 pl-36 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.1)]`}
+              className={`w-full bg-background border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-foreground/10"} rounded-full py-5 pl-36 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.1)]`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
