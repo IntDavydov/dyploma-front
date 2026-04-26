@@ -127,6 +127,13 @@ body {
   }
 }
 
+/* Force prevent zooming */
+@viewport {
+  width: device-width;
+  zoom: 1.0;
+  max-zoom: 1.0;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
