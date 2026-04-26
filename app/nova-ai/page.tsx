@@ -18,32 +18,33 @@ export default function NovaAIPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { user, incrementMessageCount, updateUsage, deleteChat } = useAuthStore();
+  const { user, incrementMessageCount, updateUsage, deleteChat } =
+    useAuthStore();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isInitialLoad = useRef(true);
 
-  const sub = user?.subscription || 'NONE';
-  const hasAccess = sub === 'PLUS' || sub === 'PRO';
-  
-  const MAX_MESSAGES = sub === 'PRO' ? 50 : 30;
+  const sub = user?.subscription || "NONE";
+  const hasAccess = sub === "PLUS" || sub === "PRO";
+
+  const MAX_MESSAGES = sub === "PRO" ? 50 : 30;
   const currentMessages = user?.messageCount || 0;
   const isLimitReached = currentMessages >= MAX_MESSAGES;
 
-  const canRecreate = (sub === 'PRO' && (user?.chatsCreated || 0) < 3);
+  const canRecreate = sub === "PRO" && (user?.chatsCreated || 0) < 3;
 
   const createNewChat = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
       const token = localStorage.getItem("token");
       const res = await fetch(`${apiUrl}/api/chats`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title: "New Analysis" })
+        body: JSON.stringify({ title: "New Analysis" }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -58,16 +59,16 @@ export default function NovaAIPage() {
 
   const handleDeleteChat = async () => {
     if (!canRecreate) return;
-    
+
     setIsLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
       const token = localStorage.getItem("token");
-      
+
       // First delete current history
       const res = await fetch(`${apiUrl}/api/chat/history`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (res.ok) {
@@ -89,7 +90,8 @@ export default function NovaAIPage() {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({
             top: scrollRef.current.scrollHeight + 1000,
-            behavior: isInitialLoad.current && messages.length > 0 ? "auto" : "smooth",
+            behavior:
+              isInitialLoad.current && messages.length > 0 ? "auto" : "smooth",
           });
           if (messages.length > 0) {
             isInitialLoad.current = false;
@@ -113,13 +115,13 @@ export default function NovaAIPage() {
     async function initChat() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
       const token = localStorage.getItem("token");
-      
+
       try {
         // 1. Fetch existing chats to find the active one
         const chatsRes = await fetch(`${apiUrl}/api/chats`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         let targetId = null;
         if (chatsRes.ok) {
           const chats = await chatsRes.json();
@@ -136,9 +138,12 @@ export default function NovaAIPage() {
 
         // 3. Load history for the active chat
         if (targetId) {
-          const historyRes = await fetch(`${apiUrl}/api/chat/${targetId}/history`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const historyRes = await fetch(
+            `${apiUrl}/api/chat/${targetId}/history`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
           if (historyRes.ok) {
             const history = await historyRes.json();
             setMessages(history);
@@ -180,7 +185,7 @@ export default function NovaAIPage() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: userMessage.content }],
+          messages: [{ role: "user", content: userMessage.content }],
         }),
       });
 
@@ -189,7 +194,10 @@ export default function NovaAIPage() {
         throw new Error(result.error || "Failed to fetch AI response");
 
       // Real-Time Sync: Use backend's accountant response to update usage instantly
-      if (result.messageCount !== undefined || result.message_count !== undefined) {
+      if (
+        result.messageCount !== undefined ||
+        result.message_count !== undefined
+      ) {
         const count = Number(result.messageCount ?? result.message_count);
         const resets = result.chatsCreated ?? result.chats_created;
         updateUsage(count, resets);
@@ -224,25 +232,35 @@ export default function NovaAIPage() {
   if (!hasAccess) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center p-8 relative z-10">
-         <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center max-w-md mx-auto"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center max-w-md mx-auto"
+        >
+          <div className="w-24 h-24 bg-accent/10 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(0,229,255,0.2)] border border-accent/20">
+            <Star className="w-10 h-10 text-accent animate-pulse" />
+          </div>
+          <h1 className="text-4xl font-black text-foreground tracking-tighter mb-4">
+            Nova AI is Restricted
+          </h1>
+          <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
+            Intelligent market analysis is a premium feature. Please upgrade to{" "}
+            <span className="text-foreground font-bold underline decoration-accent/50 underline-offset-4">
+              Nova PLUS
+            </span>{" "}
+            or{" "}
+            <span className="text-foreground font-bold underline decoration-purple-400/50 underline-offset-4">
+              PRO
+            </span>{" "}
+            to unlock full access to DeepSeek-V3 intelligence.
+          </p>
+          <button
+            onClick={() => router.push("/upgrade")}
+            className="bg-accent text-accent-foreground px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(0,229,255,0.4)] hover:shadow-[0_10px_50px_rgba(0,229,255,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
-            <div className="w-24 h-24 bg-accent/10 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(0,229,255,0.2)] border border-accent/20">
-              <Star className="w-10 h-10 text-accent animate-pulse" />
-            </div>
-            <h1 className="text-4xl font-black text-foreground tracking-tighter mb-4">Nova AI is Restricted</h1>
-            <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-              Intelligent market analysis is a premium feature. Please upgrade to <span className="text-foreground font-bold underline decoration-accent/50 underline-offset-4">Nova PLUS</span> or <span className="text-foreground font-bold underline decoration-purple-400/50 underline-offset-4">PRO</span> to unlock full access to DeepSeek-V3 intelligence.
-            </p>
-            <button 
-              onClick={() => router.push('/upgrade')}
-              className="bg-accent text-accent-foreground px-10 py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(0,229,255,0.4)] hover:shadow-[0_10px_50px_rgba(0,229,255,0.6)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            >
-              Explore Plans
-            </button>
-          </motion.div>
+            Explore Plans
+          </button>
+        </motion.div>
       </div>
     );
   }
@@ -253,7 +271,9 @@ export default function NovaAIPage() {
       className="absolute inset-0 flex flex-col overflow-y-auto scroll-smooth"
     >
       <div className="flex-1 flex flex-col relative max-w-4xl mx-auto w-full min-h-full">
-        <div className={`flex-1 p-6 md:p-8 space-y-6 pb-24 transition-all duration-700`}>
+        <div
+          className={`flex-1 p-6 md:p-8 space-y-6 pb-24 transition-all duration-700`}
+        >
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
               <Bot className="w-20 h-20 text-accent mb-6" />
@@ -296,9 +316,7 @@ export default function NovaAIPage() {
         </div>
 
         {/* Floating Input Area */}
-        {/*sticky bottom-0 w-full pt-4 pb-8 flex justify-center pointer-events-none from-background via-background to-transparent"*/}
-        <div className="sticky bottom-0 w-full pt-4 pb-2 flex flex-col items-center justify-end pointer-events-none from-background via-background to-transparent">
-
+        <div className="sticky bottom-0 w-full pb-8 flex flex-col items-center justify-end pointer-events-none z-30">
           <AnimatePresence>
             {isLimitReached && (
               <motion.div
@@ -307,14 +325,16 @@ export default function NovaAIPage() {
                 exit={{ opacity: 0, y: 10, scale: 0.9 }}
                 className="mb-4 px-6 py-4 bg-danger/20 backdrop-blur-xl border border-danger/50 text-danger rounded-2xl shadow-[0_0_30px_rgba(244,63,94,0.3)] pointer-events-auto max-w-sm text-center"
               >
-                <p className="text-sm font-bold mb-2">Chat session messages count exceeded</p>
+                <p className="text-sm font-bold mb-2">
+                  Chat session messages count exceeded
+                </p>
                 <p className="text-[10px] opacity-80 leading-relaxed mb-4">
-                  {sub === 'PRO' 
-                    ? "Please delete this chat to create a new one." 
+                  {sub === "PRO"
+                    ? "Please delete this chat to create a new one."
                     : "Please update your subscription for more messages per chat."}
                 </p>
                 {canRecreate && (
-                  <button 
+                  <button
                     onClick={handleDeleteChat}
                     className="bg-danger text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
                   >
@@ -322,8 +342,8 @@ export default function NovaAIPage() {
                   </button>
                 )}
                 {!canRecreate && (
-                  <button 
-                    onClick={() => router.push('/upgrade')}
+                  <button
+                    onClick={() => router.push("/upgrade")}
                     className="bg-accent text-accent-foreground text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
                   >
                     Upgrade Plan
@@ -346,24 +366,26 @@ export default function NovaAIPage() {
 
           <form
             onSubmit={handleSend}
-            className={`relative flex items-center w-[75%] focus-within:w-[95%] transition-all duration-300 ease-in-out px-2 pointer-events-auto ${(!hasAccess || isLimitReached) ? 'blur-md pointer-events-none opacity-50' : ''}`}
+            className={`relative z-30 flex items-center w-[75%] focus-within:w-[95%] transition-all duration-300 ease-in-out px-2 pointer-events-auto ${!hasAccess || isLimitReached ? "blur-md pointer-events-none opacity-50" : ""}`}
           >
             {/* Embedded Actions (Left) */}
             <div className="absolute left-6 z-10 flex items-center gap-3">
-              {sub === 'PRO' && (
-                 <button 
+              {sub === "PRO" && (
+                <button
                   type="button"
                   onClick={handleDeleteChat}
                   disabled={!canRecreate || messages.length === 0}
                   className="p-2 bg-foreground/5 hover:bg-foreground/10 rounded-xl border border-foreground/10 transition-all active:scale-90 disabled:opacity-20 cursor-pointer"
                   title="Reset Session"
-                 >
-                    <Zap className="w-3.5 h-3.5 text-accent" />
-                 </button>
+                >
+                  <Zap className="w-3.5 h-3.5 text-accent" />
+                </button>
               )}
               {hasAccess && (
                 <div className="bg-foreground/5 border border-foreground/10 px-3 py-1 rounded-lg">
-                  <span className={`text-[10px] font-mono font-bold ${isLimitReached ? 'text-danger' : 'text-accent'}`}>
+                  <span
+                    className={`text-[10px] font-mono font-bold ${isLimitReached ? "text-danger" : "text-accent"}`}
+                  >
                     {currentMessages}/{MAX_MESSAGES}
                   </span>
                 </div>
@@ -375,7 +397,7 @@ export default function NovaAIPage() {
               disabled={!hasAccess || isLimitReached}
               type="text"
               placeholder={isLimitReached ? "Limit Reached" : "Message"}
-              className={`w-full bg-background border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-foreground/10"} rounded-full py-5 pl-36 pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 ${input.length > 300 ? "focus:ring-danger/50" : "focus:ring-accent/50"} transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.1)]`}
+              className={`w-full bg-background/60 backdrop-blur-xl border ${input.length > 300 ? "border-danger/50 ring-1 ring-danger/50 bg-danger/5" : "border-foreground/10"} rounded-full py-5 ${sub === "PRO" ? "pl-36" : "pl-26"} pr-24 text-base md:text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.2)]`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
@@ -388,7 +410,13 @@ export default function NovaAIPage() {
 
             <button
               type="submit"
-              disabled={isLoading || !input.trim() || input.length > 300 || !hasAccess || isLimitReached}
+              disabled={
+                isLoading ||
+                !input.trim() ||
+                input.length > 300 ||
+                !hasAccess ||
+                isLimitReached
+              }
               className={`absolute right-4 p-2.5 rounded-full transition-all cursor-pointer ${
                 input.length > 300 || isLimitReached
                   ? "bg-danger/10 text-danger opacity-50 cursor-not-allowed"
@@ -398,6 +426,23 @@ export default function NovaAIPage() {
               <Send className="w-5 h-5" />
             </button>
           </form>
+          {/* THE OVERLAY: Absolute at bottom, high Z-index to hide messages */}
+          <div className="absolute bottom-0 left-0 w-full h-32 pointer-events-none z-20 overflow-hidden">
+            {/* LAYER 1: The standard vertical fade for the whole width */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+
+            {/* LAYER 2: The Right-Side Anchor with a VERTICAL fade added */}
+            {/* We use a linear-gradient to go from solid #0c0f1b at the bottom to transparent at the top */}
+            <div
+              className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-[#0c0f1b] to-transparent"
+              style={{
+                maskImage:
+                  "linear-gradient(to top, black 20%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to top, black 20%, transparent 100%)",
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
